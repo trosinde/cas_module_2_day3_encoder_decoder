@@ -29,10 +29,6 @@ NOTEBOOKS = {
     "autoencoder.ipynb": dict(fit=UUID_FIT, save=UUID_SAVE, load=ae("autoencoder_course.keras"), course=True,
                               names={"autoencoder.keras": "autoencoder_course.keras", "encoder.keras": "encoder_course.keras",
                                      "decoder.keras": "decoder_course.keras"}),
-    "vae.ipynb": dict(fit=UUID_FIT, save="028138af-d3a5-4134-b980-d3a8a703e70f", course=True,
-                      load=enc_dec("encoder_course_vae.keras", "decoder_course_vae.keras"),
-                      names={"vae.keras": "vae_course.keras", "encoder.keras": "encoder_course_vae.keras",
-                             "decoder.keras": "decoder_course_vae.keras"}),
     "autoencoder_on_CIFAR-10_v1_bugfix.ipynb": dict(fit=UUID_FIT, save=UUID_SAVE, load=ae("autoencoder_v1.keras"),
         names={"autoencoder.keras": "autoencoder_v1.keras", "encoder.keras": "encoder_v1.keras", "decoder.keras": "decoder_v1.keras"}),
     "autoencoder_on_CIFAR-10_v2_vae.ipynb": dict(fit=UUID_FIT, save=UUID_SAVE, load=enc_dec("encoder_v2.keras", "decoder_v2.keras"),
@@ -55,6 +51,13 @@ def indent(text):
 
 def patch(name, cfg):
     nb = json.load(open(SRC / name))
+    for old, new in cfg.get("replace", {}).items():
+        hits = 0
+        for c in nb["cells"]:
+            if c["cell_type"] == "code" and old in "".join(c["source"]):
+                c["source"] = src("".join(c["source"]).replace(old, new))
+                hits += 1
+        assert hits, (name, old)
     cells = {c.get("id"): c for c in nb["cells"]}
     fit, save = cells[cfg["fit"]], cells[cfg["save"]]
     params = next(c for c in nb["cells"] if c["cell_type"] == "code" and "BATCH_SIZE =" in "".join(c["source"]))
@@ -75,6 +78,6 @@ def patch(name, cfg):
 DEST.mkdir(parents=True, exist_ok=True)
 for name, cfg in NOTEBOOKS.items():
     patch(name, cfg)
-for name in ("CLIP.ipynb", "autoencoder_on_CIFAR-10.ipynb"):
+for name in ("autoencoder_on_CIFAR-10.ipynb",):
     shutil.copy(SRC / name, DEST / name)
 shutil.copytree(SRC / "images", DEST / "images", dirs_exist_ok=True)

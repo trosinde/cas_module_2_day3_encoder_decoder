@@ -39,15 +39,12 @@ Aus dem Kurs:
 | Notebook | Inhalt | Lädt |
 |---|---|---|
 | `autoencoder` | Autoencoder auf Fashion-MNIST | `models/autoencoder_course.keras` |
-| `vae` | VAE auf Fashion-MNIST | `models/encoder_course_vae.keras`, `decoder_course_vae.keras` |
-| `autoencoder_on_CIFAR-10` | Ausgangspunkt der Übung, **bricht absichtlich unverändert mit dem ursprünglichen Fehler ab**. v1 enthält die Korrektur | – |
-| `CLIP` | CLIP-Demo. Lädt sein vortrainiertes Modell selbst und braucht eine GPU (`.cuda()`) | – |
+| `autoencoder_on_CIFAR-10` | Ausgangspunkt der Übung, **bricht unverändert mit dem ursprünglichen Fehler ab**. v1 enthält die Korrektur | – |
 
 ## Was anders ist als im ursprünglichen Lauf
 
 - **v4:** Vom ersten v4-Lauf war kein Modell gespeichert. `autoencoder_v4.keras` stammt aus einem Nachlauf mit demselben Modell und Prüfer (R0 in `v5_experiments/`).
-- **Kurs-Modelle:** einmalig mit den Einstellungen der Notebooks trainiert, 3 und 5 Epochen.
-- **`vae.ipynb`:** zwei Anpassungen für die aktuelle Keras-Version: `int(np.prod(...))`, und das VAE wird nicht als Ganzes gespeichert, nur Encoder und Decoder.
+- **Kurs-Modell:** einmalig mit den Einstellungen des Notebooks trainiert, 3 Epochen.
 - **Ausgaben:** Die gespeicherten Ausgaben der Notebooks stammen aus dem Lauf mit geladenen Modellen. Trainingsverläufe stehen deshalb nicht mehr darin.
 - **Cluster-Bilder:** t-SNE und die zufälligen Punkte des VAE sind nicht exakt reproduzierbar. Die Cluster können sich von Lauf zu Lauf unterscheiden.
 
