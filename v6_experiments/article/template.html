@@ -83,6 +83,8 @@ button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-co
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
 .stat { display: grid; gap: 0; border-left: 3px solid var(--line); padding-left: 8px; font-size: .78rem; color: var(--muted); }
 .stat b { font: 600 1.25rem var(--mono); color: var(--fg); }
+.stat a, .key a, a.mlink { color: var(--accent); }
+.stats + .cap a { color: var(--accent); }
 .demo { background: var(--surface); border: 1px solid var(--line); padding: 16px; display: grid; gap: 12px; }
 .demo-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
 .demo-cols > div { display: grid; gap: 6px; align-content: start; min-width: 0; }
@@ -168,11 +170,11 @@ table.feat td { vertical-align: middle; }
 
   <h3>Woran wir das Ergebnis messen</h3>
   <div class="keys">
-    <div class="key"><b>Ähnlichkeit (SSIM)</b>Vergleicht Helligkeit, Kontrast und Struktur in kleinen Bildausschnitten. 1,0 heißt identisch. Höher ist besser.</div>
-    <div class="key"><b>Abweichung (MSE)</b>Wie weit jedes Pixel im Schnitt vom Original entfernt ist. Niedriger ist besser.</div>
-    <div class="key"><b>Raster (Nyquist-Leistung)</b>Wie stark Pixel im feinsten Schachbrett-Takt hell und dunkel wechseln. Das Original liegt bei 0,056. Weit darüber heißt: künstliches Muster.</div>
-    <div class="key"><b>Klassen-Treffer (k-NN)</b>Ein einfaches Verfahren schaut, welche Bilder im Merkzettel am nächsten liegen, und rät daraus die Klasse. Blindes Raten träfe 10 %.</div>
-    <div class="key"><b>Natürlichkeit (KID)</b>Ein fertiges Bilderkennungsnetz vergleicht, wie sich die Nachbilder als Gruppe von echten Fotos unterscheiden. 0 heißt: nicht unterscheidbar. Niedriger ist besser.</div>
+    <div class="key"><b>Ähnlichkeit (SSIM)</b>Vergleicht Helligkeit, Kontrast und Struktur in kleinen Bildausschnitten. 1,0 heißt identisch. Höher ist besser. <a href="#m-ssim">Verfahren im Anhang</a></div>
+    <div class="key"><b>Abweichung (MSE)</b>Wie weit jedes Pixel im Schnitt vom Original entfernt ist, quadriert. Niedriger ist besser. <a href="#m-mse">Verfahren im Anhang</a></div>
+    <div class="key"><b>Raster (Nyquist-Leistung)</b>Wie stark Pixel im feinsten Schachbrett-Takt hell und dunkel wechseln. Das Original liegt bei 0,056. Weit darüber heißt: künstliches Muster. <a href="#m-nyquist">Verfahren im Anhang</a></div>
+    <div class="key"><b>Klassen-Treffer (k-NN)</b>Ein einfaches Verfahren schaut, welche Bilder im Merkzettel am nächsten liegen, und rät daraus die Klasse. Blindes Raten träfe 10 %. <a href="#m-knn">Verfahren im Anhang</a></div>
+    <div class="key"><b>Natürlichkeit (KID)</b>Ein fertiges Bilderkennungsnetz vergleicht, wie sich die Nachbilder als Gruppe von echten Fotos unterscheiden. 0 heißt: nicht unterscheidbar. Niedriger ist besser. <a href="#m-kid">Verfahren im Anhang</a></div>
   </div>
 
   <h3>So liest du die Cluster-Bilder</h3>
@@ -321,16 +323,16 @@ table.feat td { vertical-align: middle; }
   <p class="note">Rot sind alle Bilder derselben Klasse, der gelbe Rand zeigt das gewählte Bild. Grau sind alle übrigen Testbilder.</p>
   <div class="multi" id="multi"></div>
   <div class="chart">
-    <h3>Klassen-Treffer auf Basis des Merkzettels</h3>
+    <h3>Klassen-Treffer (k-NN) auf Basis des Merkzettels</h3>
     <div class="squeeze" id="knn"></div>
-    <p class="note">Gleiche Messung auf 5.000 Testbildern, nur 4.000 davon zum Vergleichen. v5 merkt sich mehr darüber, wo was im Bild liegt, und liegt damit wohl näher an den rohen Pixeln. Das ist eine Vermutung und nicht gemessen.</p>
+    <p class="note">Gleiche Messung auf 5.000 Testbildern, davon 4.000 als Vergleichsbilder. Wichtig: Diese Zahl sagt nichts darüber, wie gut ein Bild nachgemalt wird. Darin liegt v5 klar vorne. Warum v4 hier trotzdem gewinnt, steht direkt unten in der <a href="#warum-v4">Zusammenfassung</a>.</p>
   </div>
 </section>
 
 <section>
   <div class="eyebrow">Zusammenfassung</div>
   <h2>Was am meisten gebracht hat</h2>
-  <div class="answer">
+  <div class="answer" id="warum-v4">
     <h3>Warum hat v4 die höhere Prozentzahl, obwohl v5 besser ist?</h3>
     <p>Die beiden messen Verschiedenes. <b>Besser</b> heißt auf dieser Seite: Das Bild wird genauer nachgemalt. Die Prozentzahl ist der Klassen-Treffer und sagt nur, wie gut ähnliche Merkzettel zur selben Klasse gehören. Das Bild selbst geht darin nicht ein. v5 malt also deutlich besser, v4 sortiert besser.</p>
     <div class="tablewrap"><table>
@@ -338,18 +340,20 @@ table.feat td { vertical-align: middle; }
       <tbody>
         <tr><td>Ähnlichkeit (SSIM, höher ist besser)</td><td>0,423</td><td>0,903</td><td>v5</td></tr>
         <tr><td>Abweichung (MSE, niedriger ist besser)</td><td>0,0182</td><td>0,0022</td><td>v5</td></tr>
-        <tr><td>Raster (Original 0,056, darüber ist Muster)</td><td>5,949</td><td>0,007</td><td>v5</td></tr>
+        <tr><td>Raster (Nyquist-Leistung, Original 0,056, darüber ist Muster)</td><td>5,949</td><td>0,007</td><td>v5</td></tr>
         <tr><td>Klassen-Treffer (k-NN, höher ist besser)</td><td>41,9 %</td><td>23,7 %</td><td>v4</td></tr>
       </tbody>
     </table></div>
-    <p>Das Ziel dieser Versionen war das Nachmalen, deshalb gilt v5 als besser. Warum v4 besser sortiert, ist nicht gemessen. Vermutlich hilft, dass sein Prüfer mit den Merkmalen eines Bilderkennungsnetzes rechnet.</p>
+    <p><b>Darum gilt v5 als besser:</b> Trainiert wurde jede Version nur aufs Nachmalen. Das Sortieren hat keine Version gelernt, es ist bei allen ein Nebeneffekt.</p>
+    <p><b>Darum ist der Nebeneffekt bei v4 größer:</b> Der Merkzettel von v5 beschreibt genau, welche Farbe <i>wo</i> im Bild liegt. Ein rotes und ein weißes Auto bekommen dadurch sehr verschiedene Merkzettel, ein rotes Auto und ein roter Apfel eher ähnliche. v5 sortiert deshalb kaum anders als die rohen Pixel (23,7 % gegen 26,9 %). Bei v4 rechnet der Prüfer mit einem Bilderkennungsnetz, dadurch landet im Merkzettel eher, <i>was</i> im Bild ist. Diese Erklärung ist plausibel, aber nicht einzeln gemessen.</p>
+    <p><b>Folge:</b> Wer gute Bilder und gutes Sortieren will, muss dem Modell die Klassen im Training zeigen (siehe nächste Schritte).</p>
   </div>
   <div class="chart">
     <h3>Ähnlichkeit zum Original nach Version (SSIM, 1,0 = identisch)</h3>
     <div class="squeeze" id="ssim"></div>
   </div>
   <div class="chart">
-    <h3>Raster: künstliches Schachbrettmuster (Original = 0,056)</h3>
+    <h3>Raster (Nyquist-Leistung): künstliches Schachbrettmuster, Original = 0,056</h3>
     <div class="squeeze" id="ras"></div>
   </div>
 
@@ -395,7 +399,7 @@ table.feat td { vertical-align: middle; }
 
 <section id="anhang">
   <div class="eyebrow">Anhang</div>
-  <h2>L1, SSIM und VGG genau erklärt</h2>
+  <h2>L1, SSIM, VGG und die Messverfahren genau erklärt</h2>
   <p class="lead">Ja, alle drei können Teil der Optimierungsfunktion sein. Sie heißt auch Loss und ist die Note, die das Modell nach jedem Bild-Stapel bekommt und im Training senken soll. Im finalen v5 stecken nur L1 und SSIM. VGG war in v4 dabei und wurde für v5 entfernt.</p>
 
   <h3>Wo der Loss im Training sitzt</h3>
@@ -421,7 +425,7 @@ table.feat td { vertical-align: middle; }
   <p class="note">Das kurze VGG-Nachtraining R2 nutzte zusätzlich eine normierte VGG-Variante und eine Glättungsstrafe. Die Kennzahlen Raster und Klassen-Treffer sowie Laplace-Schärfe gehen nie in den Loss ein, sie messen nur hinterher. SSIM und MSE sind auf dieser Seite auch Messwerte. In der Messung nutzt SSIM Fenster von 11×11 Pixeln, im v5-Training 7×7.</p>
 
   <div class="demo" id="l1demo">
-    <h3>L1: der gerade Pixelvergleich</h3>
+    <h3 id="m-mse">L1 und MSE: der gerade Pixelvergleich</h3>
     <p>Für jedes Pixel und jeden Farbkanal: Wie weit liegt der gemalte Wert vom Original entfernt? Davon der Durchschnitt. Ein Pixel mit 0,8 im Original und 0,5 im Nachbild kostet 0,3. MSE quadriert diesen Abstand vorher und kommt auf 0,09.</p>
     <p class="formula">L1 = Durchschnitt von |Original − Nachbild|<br>MSE = Durchschnitt von (Original − Nachbild)²</p>
     <p><b>Was das Quadrieren ändert:</b> Bei vier Pixeln mit den Fehlern 0,1, 0,1, 0,1 und 0,5 macht der große Fehler bei L1 knapp zwei Drittel der Summe aus, bei MSE rund 89 %. MSE achtet also vor allem darauf, große Fehler zu vermeiden. Das führt zum vorsichtigen Grau.</p>
@@ -432,7 +436,7 @@ table.feat td { vertical-align: middle; }
   </div>
 
   <div class="demo">
-    <h3>SSIM: Stimmt die Struktur?</h3>
+    <h3 id="m-ssim">SSIM: Stimmt die Struktur?</h3>
     <p>SSIM vergleicht keine einzelnen Pixel. Es schiebt ein kleines Fenster von 7×7 Pixeln über das Bild, mit Gewicht auf der Fenstermitte, und stellt an jeder Stelle drei Fragen:</p>
     <div class="keys">
       <div class="key"><b>Helligkeit</b>Ist der Ausschnitt im Mittel gleich hell?</div>
@@ -468,6 +472,22 @@ table.feat td { vertical-align: middle; }
     <h3>Die Noten am echten Frosch</h3>
     <div class="tablewrap"><table id="frogTable"></table></div>
     <p>Die Spalten zeigen die beiden Nachbilder, die markierten Zeilen die Note nach der jeweiligen Formel. Beide Formeln ergeben für das v5-Nachbild die bessere Note, obwohl v5 nie mit VGG trainiert wurde. Das ist ein einzelnes Bild und kein Gesamtergebnis. Noten aus verschiedenen Formeln dürfen nicht miteinander verglichen werden, nur Bilder innerhalb einer Formel.</p>
+  </div>
+
+  <div class="demo" id="messung">
+    <h3>Die Messwerte: so wird jeder gemessen</h3>
+    <p>Alle Werte entstehen erst nach dem Training. Sie benoten das Modell, beeinflussen es aber nicht. Gemessen wird auf Testbildern, die das Modell nie gesehen hat.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Messwert</th><th>Verfahren</th><th>So wird gerechnet</th><th>Gut ist</th></tr></thead>
+      <tbody>
+        <tr><td>Ähnlichkeit</td><td>SSIM</td><td class="w">Fenster von 11×11 Pixeln wandert über Original und Nachbild. Je Fenster werden Helligkeit, Kontrast und Struktur verglichen und multipliziert. Durchschnitt über alle Fenster, Farbkanäle und Bilder. Ablauf wie oben bei <a class="mlink" href="#m-ssim">SSIM</a>.</td><td>nahe 1</td></tr>
+        <tr><td>Abweichung</td><td>MSE (mittlerer quadratischer Fehler)</td><td class="w">Je Pixel und Farbkanal: Original minus Nachbild, quadriert. Davon der Durchschnitt über alle Bilder. Pixelwerte liegen zwischen 0 und 1. Formel oben bei <a class="mlink" href="#m-mse">L1 und MSE</a>.</td><td>nahe 0</td></tr>
+        <tr id="m-nyquist"><td>Raster</td><td>Nyquist-Leistung (Frequenzanalyse)</td><td class="w">Das Nachbild wird mit einer Fourier-Analyse in Wellen verschiedener Feinheit zerlegt. Gemessen wird nur die Energie der feinsten Welle, die ein Pixelraster darstellen kann: hell, dunkel, hell von Pixel zu Pixel, also ein Schachbrett. Gleiche Rechnung am Original ergibt den Vergleichswert 0,056.</td><td>nahe 0,056</td></tr>
+        <tr id="m-knn"><td>Klassen-Treffer</td><td>k-NN (k nächste Nachbarn)</td><td class="w">Jedes Bild wird nur durch seinen Merkzettel vertreten. Von 5.000 Testbildern dienen 4.000 als Nachschlagewerk mit bekannter Klasse. Für jedes der übrigen 1.000 Bilder werden die k ähnlichsten Merkzettel gesucht, die Mehrheit ihrer Klassen ist der Tipp. Der Wert ist der Anteil richtiger Tipps.</td><td>hoch, Raten = 10 %</td></tr>
+        <tr id="m-kid"><td>Natürlichkeit</td><td>KID (Kernel Inception Distance)</td><td class="w">Das Bilderkennungsnetz Inception-V3 fasst jedes Bild als Merkmalsliste zusammen. Dann wird verglichen, wie sich die Merkmale der Nachbilder und der echten Testbilder als Gruppe verteilen, hier 100-mal mit je 1.000 Bildern. Einzelne Bildpaare spielen keine Rolle.</td><td>nahe 0</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">SSIM und MSE vergleichen Bild mit Bild. Die Nyquist-Leistung schaut nur auf ein bestimmtes Muster im Nachbild. KID vergleicht ganze Gruppen von Bildern. k-NN schaut gar nicht auf das Bild, sondern nur auf den Merkzettel. Deshalb können die Werte in verschiedene Richtungen zeigen, wie bei v4 und v5.</p>
   </div>
 
   <div class="keys">
@@ -565,10 +585,11 @@ function clusterCanvas(v) {
 }
 
 const STATS = v => `<div class="stats">
-  <div class="stat"><b>${de(V[v].ssim,3)}</b>Ähnlichkeit</div>
-  <div class="stat"><b>${de(V[v].mse,4)}</b>Abweichung</div>
-  <div class="stat"><b>${de(V[v].nyquist_power,3)}</b>Raster</div>
-  <div class="stat"><b>${pct(V[v].knn)}</b>Klassen-Treffer</div></div>`;
+  <div class="stat"><b>${de(V[v].ssim,3)}</b><span>Ähnlichkeit (<a href="#m-ssim">SSIM</a>)</span></div>
+  <div class="stat"><b>${de(V[v].mse,4)}</b><span>Abweichung (<a href="#m-mse">MSE</a>)</span></div>
+  <div class="stat"><b>${de(V[v].nyquist_power,3)}</b><span>Raster (<a href="#m-nyquist">Nyquist-Leistung</a>)</span></div>
+  <div class="stat"><b>${pct(V[v].knn)}</b><span>Klassen-Treffer (<a href="#m-knn">k-NN</a>)</span></div></div>
+<div class="cap">Wie jeder Wert gemessen wird: Abkürzung antippen, sie führt zum Verfahren im Anhang.</div>`;
 
 document.querySelectorAll("section.version").forEach(sec => {
   const v = sec.dataset.v;
@@ -616,14 +637,14 @@ const rows = [
   ["A2","alter Decoder, MSE","256",EXTRA.A2],["A1","alter Decoder, L1 + SSIM","256",EXTRA.A1],
   ["R1","neue Architektur, L1 + SSIM","256",EXTRA.R1],["R2","R1 + 300 Schritte VGG","256",EXTRA.R2],
   ["v5","neue Architektur, L1 + SSIM","512",V.v5,"hl"],["B0","wie v5, aber 11.250 Schritte","512",EXTRA.B0],["v6","B1: wie B0, doppelt so breit","512",V.v6,"hl"],["B2","B1 + VGG und Glättung","512",EXTRA.B2],["v6 GAN","B3: B1 + Fälschungs-Erkenner","512",V.v6g,"hl"],["B4","B1 + VGG und Fälschungs-Erkenner","512",EXTRA.B4],["PCA 512","klassisches Vergleichsverfahren","512",EXTRA.pca512]];
-document.getElementById("table").innerHTML = `<thead><tr><th>Lauf</th><th>Was</th><th>Zahlen</th><th>SSIM</th><th>Abweichung</th><th>Raster</th></tr></thead><tbody>` +
+document.getElementById("table").innerHTML = `<thead><tr><th>Lauf</th><th>Was</th><th>Zahlen</th><th>Ähnlichkeit (SSIM)</th><th>Abweichung (MSE)</th><th>Raster (Nyquist-Leistung)</th></tr></thead><tbody>` +
   rows.map(([a,b,c,m,h]) => `<tr class="${h||""}"><td>${a}</td><td class="w">${b}</td><td>${c}</td><td>${de(m.ssim,3)}</td><td>${de(m.mse,5)}</td><td>${de(m.nyquist_power,3)}</td></tr>`).join("") + "</tbody>";
 
 // v6: Prüfer und Schärfefilter
-document.getElementById("prueferTable").innerHTML = `<thead><tr><th>Prüfer</th><th>Abweichung</th><th>SSIM</th><th>KID</th><th>VGG-Abstand</th><th>Raster</th></tr></thead><tbody>` +
+document.getElementById("prueferTable").innerHTML = `<thead><tr><th>Prüfer</th><th>Abweichung (MSE)</th><th>Ähnlichkeit (SSIM)</th><th>Natürlichkeit (KID)</th><th>VGG-Abstand</th><th>Raster (Nyquist-Leistung)</th></tr></thead><tbody>` +
   [["L1 + SSIM (B1)",EXTRA.B1],["+ VGG (B2)",EXTRA.B2],["+ GAN (B3)",EXTRA.B3,"hl"],["+ VGG + GAN (B4)",EXTRA.B4]].map(([n,m,h]) => `<tr class="${h||""}"><td>${n}</td><td>${de(m.mse,5)}</td><td>${de(m.ssim,3)}</td><td>${de(m.kid,4)}</td><td>${de(m.vgg_distance,4)}</td><td>${de(m.nyquist_power,3)}</td></tr>`).join("") +
   `<tr><td>Original</td><td></td><td></td><td>0,0000</td><td></td><td>${de(EXTRA.original.nyquist_power,3)}</td></tr></tbody>`;
-document.getElementById("unsharpTable").innerHTML = `<thead><tr><th>Modell, Stärke</th><th>Abweichung</th><th>SSIM</th><th>KID</th><th>Raster</th></tr></thead><tbody>` +
+document.getElementById("unsharpTable").innerHTML = `<thead><tr><th>Modell, Stärke</th><th>Abweichung (MSE)</th><th>Ähnlichkeit (SSIM)</th><th>Natürlichkeit (KID)</th><th>Raster (Nyquist-Leistung)</th></tr></thead><tbody>` +
   Object.entries(EXTRA.unsharp).flatMap(([tag,rows]) => Object.entries(rows).map(([a,m]) => `<tr><td>${tag}, ${a.replace(".",",")}</td><td>${de(m.mse,5)}</td><td>${de(m.ssim,3)}</td><td>${de(m.kid,4)}</td><td>${de(m.nyquist_power,3)}</td></tr>`)).join("") + "</tbody>";
 
 // Kante und Stempel
