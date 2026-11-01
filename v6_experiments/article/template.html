@@ -1,0 +1,654 @@
+<title>Vom Farbklumpen zum Frosch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: eine einspaltige Lesereise von v1 bis v5, jede Version nach demselben Raster aus Überlegung, Änderung, Bild, Cluster. */
+:root {
+  --bg: #eef2f4; --surface: #ffffff; --fg: #15262e; --muted: #51636c; --line: #cdd8dd;
+  --accent: #0f6c7c; --accent-soft: #d3e9ed; --warn: #b4441d; --warn-soft: #f8e2d8; --good: #1c7a4d;
+  --dot: #b4c2c9; --hit: #d1341b;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11191d; --surface: #1a252a; --fg: #e6eef1; --muted: #a2b3bb; --line: #33444c;
+  --accent: #5cc0d1; --accent-soft: #1b3d45; --warn: #f08a62; --warn-soft: #43261b; --good: #62c795;
+  --dot: #4b5d65; --hit: #ff7a5c; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #11191d; --surface: #1a252a; --fg: #e6eef1; --muted: #a2b3bb; --line: #33444c;
+  --accent: #5cc0d1; --accent-soft: #1b3d45; --warn: #f08a62; --warn-soft: #43261b; --good: #62c795;
+  --dot: #4b5d65; --hit: #ff7a5c; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 400 18px/1.55 var(--body); }
+.wrap { max-width: 860px; margin: 0 auto; padding-block: 40px 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 64px; }
+section, header { display: grid; gap: 18px; min-width: 0; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.12; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 700; }
+h2 { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 700; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+ul { margin: 0; padding-left: 1.2em; max-width: 68ch; display: grid; gap: 6px; }
+.lead { font-size: 1.2rem; }
+.eyebrow { font: 600 .78rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.note { font-size: .92rem; color: var(--muted); }
+code { font: 400 .85em var(--mono); background: var(--accent-soft); padding: .05em .3em; border-radius: 3px; overflow-wrap: anywhere; }
+.px { image-rendering: pixelated; display: block; width: 100%; }
+.tile { aspect-ratio: 1; background-repeat: no-repeat; background-size: 1000% 100%; image-rendering: pixelated; width: 100%; }
+.series { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.series figure { margin: 0; display: grid; gap: 4px; }
+.series figcaption { font: 400 .72rem/1.25 var(--mono); color: var(--muted); }
+.series figcaption b { color: var(--fg); font-weight: 600; }
+@media (max-width: 520px) { .series { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.answer { background: var(--surface); border: 1px solid var(--line); padding: 22px; display: grid; gap: 12px; }
+.answer h2 { font-size: 1.3rem; }
+.flow { display: grid; grid-template-columns: 1fr .6fr 1fr .6fr 1fr; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--line); padding: 16px; }
+.flow > div { min-width: 0; display: grid; gap: 4px; text-align: center; font-size: .82rem; color: var(--muted); }
+.flow .num { font: 600 1.1rem var(--mono); color: var(--accent); }
+.flow svg { width: 100%; height: 70px; display: block; }
+.flow svg path { fill: var(--accent-soft); stroke: var(--accent); }
+.flow svg text { fill: var(--fg); font: 600 11px var(--body); }
+.squeeze { display: grid; gap: 6px; }
+.bar-row { display: grid; grid-template-columns: minmax(96px, 150px) minmax(0, 1fr) 70px; gap: 8px; align-items: center; font-size: .92rem; }
+.bar-row .track { min-width: 0; height: 16px; }
+.bar-row .fill { height: 100%; background: var(--accent); border-radius: 0 3px 3px 0; min-width: 2px; }
+.bar-row.warn .fill { background: var(--warn); }
+.bar-row.ref .fill { background: var(--dot); }
+.bar-row .val { font: 400 .82rem var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.bar-row.best .name, .bar-row.best .val { font-weight: 700; }
+.chart { background: var(--surface); border: 1px solid var(--line); padding: 16px; display: grid; gap: 10px; }
+.chart h3 { font-size: 1rem; }
+.keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.key { background: var(--surface); border: 1px solid var(--line); padding: 14px; display: grid; gap: 4px; align-content: start; font-size: .95rem; }
+.key b { font-family: var(--display); }
+.version { border-top: 3px solid var(--fg); padding-top: 20px; }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 14px; }
+.tag { font: 600 1rem var(--mono); background: var(--fg); color: var(--bg); padding: 2px 8px; }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.step { background: var(--surface); border: 1px solid var(--line); padding: 14px; font-size: .97rem; min-width: 0; }
+.step.you { background: var(--accent-soft); border-color: transparent; }
+.step h3 { margin-bottom: 6px; font-size: .8rem; font-family: var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.visuals { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 14px; align-items: start; }
+@media (max-width: 640px) { .visuals { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--surface); border: 1px solid var(--line); padding: 12px; display: grid; gap: 8px; min-width: 0; }
+.panel .cap { font: 400 .74rem/1.3 var(--mono); color: var(--muted); }
+canvas.cluster { width: 100%; aspect-ratio: 1; display: block; }
+.ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: .86rem; }
+select, button { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); padding: 3px 7px; border-radius: 3px; }
+button { cursor: pointer; }
+button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.stat { display: grid; gap: 0; border-left: 3px solid var(--line); padding-left: 8px; font-size: .78rem; color: var(--muted); }
+.stat b { font: 600 1.25rem var(--mono); color: var(--fg); }
+.demo { background: var(--surface); border: 1px solid var(--line); padding: 16px; display: grid; gap: 12px; }
+.demo-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.demo-cols > div { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.cells { display: grid; gap: 1px; max-width: 320px; }
+.cells i { aspect-ratio: 1; display: block; }
+canvas.mini { width: 100%; max-width: 240px; aspect-ratio: 1; image-rendering: pixelated; display: block; }
+.grids { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; }
+.grids > div { display: grid; gap: 6px; font-size: .85rem; max-width: 210px; }
+.gridbox { width: 150px; height: 150px; display: grid; gap: 2px; }
+.gridbox i { background: var(--accent); display: block; }
+.compare { display: grid; gap: 14px; }
+.pick { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; }
+.pick button { padding: 0; border: 2px solid transparent; background: none; border-radius: 0; }
+.pick button[aria-pressed="true"] { border-color: var(--hit); background: none; }
+.big { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 180px)); gap: 10px; }
+.big figure { margin: 0; display: grid; gap: 4px; font: 400 .76rem/1.25 var(--mono); color: var(--muted); }
+.big figcaption b { color: var(--fg); }
+.multi { display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 10px; }
+.tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td.w { white-space: normal; min-width: 200px; }
+th { font: 600 .76rem var(--mono); color: var(--muted); }
+tr.hl td { font-weight: 700; background: var(--accent-soft); }
+.rank { display: grid; gap: 12px; }
+.rank > div { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 4px 10px; background: var(--surface); border: 1px solid var(--line); padding: 14px; }
+.rank .n { font: 700 1.5rem var(--display); color: var(--accent); }
+.rank p { grid-column: 2; }
+.rank h3 { grid-column: 2; }
+#anhang .keys { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.loop { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; counter-reset: none; }
+.loopstep { background: var(--surface); border: 1px solid var(--line); padding: 12px; display: grid; gap: 4px; align-content: start; font-size: .92rem; }
+.loopstep.hl { background: var(--accent-soft); border-color: var(--accent); }
+.loopstep b { font-family: var(--display); }
+.formula, .mono { font: 400 .84rem/1.5 var(--mono); }
+.formula { background: var(--bg); padding: 8px 10px; max-width: none; overflow-wrap: anywhere; }
+ol { margin: 0; padding-left: 1.3em; max-width: 68ch; display: grid; gap: 6px; }
+input[type=range] { flex: 1 1 160px; min-width: 0; accent-color: var(--accent); }
+.swatch { width: 28px; height: 28px; border: 1px solid var(--line); display: inline-block; }
+.ssimgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+.ssimcase { display: grid; gap: 6px; align-content: start; font-size: .9rem; min-width: 0; }
+table.feat .featimg { width: 110px; max-width: 26vw; }
+table.feat td { vertical-align: middle; }
+@media (prefers-reduced-motion: no-preference) { button { transition: background-color .15s; } }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Autoencoder auf CIFAR-10 · v1 bis v5</div>
+  <h1>Vom Farbklumpen zum Frosch</h1>
+  <p class="lead">Derselbe Frosch, einmal durch jede Version unseres Modells geschickt. Dieses Bild zeigt die ganze Geschichte. Der Rest der Seite erklärt, warum es sich so verändert hat.</p>
+  <div class="series" id="hero"></div>
+  <div class="answer">
+    <h2>Das Wichtigste vorab</h2>
+    <p><b>Am meisten hat insgesamt der größere Engpass gebracht:</b> Das Modell darf sich mehr Zahlen pro Bild merken. Dadurch wurde aus grauem Nebel überhaupt erst ein Motiv.</p>
+    <p><b>Gegen deine Fraktale half der Umbau des Modells:</b> Ein neuer Decoder und ein Engpass, der den Ort im Bild behält. Das senkte das Raster auf ein Zehntel und die Abweichung um 62 %, bei sonst gleichen Bedingungen.</p>
+    <p><b>Nicht gelöst:</b> Die Bilder sind besser, aber nicht fotoscharf. Das Sortieren nach Klassen ist sogar schlechter als in v3.</p>
+  </div>
+</header>
+
+<section>
+  <div class="eyebrow">Ausgangslage</div>
+  <h2>Was ich vorgefunden habe</h2>
+  <p>Eine Kursübung: Ein Autoencoder soll Farbbilder mit 32×32 Pixeln lernen, aus zehn Klassen wie Auto, Katze oder Frosch. Das Notebook brach aber schon beim Aufbau mit einer Fehlermeldung ab. Es war zudem sehr knapp eingestellt: drei Rechenstufen, fünf Trainingsdurchgänge und ein Engpass von nur zwei Zahlen.</p>
+
+  <h3>Was ein Autoencoder tut</h3>
+  <p>Stell dir vor, du beschreibst jemandem am Telefon ein Bild, und die Person malt es nach. Der Encoder ist die beschreibende Person, der Decoder die malende. Der Engpass ist die Zahl der Wörter, die du verwenden darfst. Trainiert wird, indem das gemalte Bild mit dem Original verglichen wird. Was im Engpass steht, nenne ich auf dieser Seite den Merkzettel.</p>
+  <div class="flow" aria-label="Schema: Bild geht durch Encoder in den Engpass und durch den Decoder zurück in ein Bild">
+    <div><div class="tile" data-strip="original" data-i="7"></div><span class="num">3.072</span>Zahlen im Original</div>
+    <svg viewBox="0 0 100 70" role="img" aria-label="Encoder verkleinert"><path d="M2 4 L98 26 L98 44 L2 66 Z"/><text x="50" y="39" text-anchor="middle">Encoder</text></svg>
+    <div><span class="num">2 bis 512</span>Zahlen im Engpass, je nach Version</div>
+    <svg viewBox="0 0 100 70" role="img" aria-label="Decoder vergrößert"><path d="M2 26 L98 4 L98 66 L2 44 Z"/><text x="50" y="39" text-anchor="middle">Decoder</text></svg>
+    <div><div class="tile" data-strip="v5" data-i="7"></div><span class="num">3.072</span>Zahlen, nachgemalt</div>
+  </div>
+
+  <div class="chart">
+    <h3>So eng ist der Engpass: Zahlen pro Bild, maßstabsgetreu</h3>
+    <div class="squeeze" id="squeeze"></div>
+    <p class="note">Bei 2 Zahlen von 3.072 bleiben nur grobe Dinge übrig, etwa ob ein Bild oben hell und unten dunkel ist.</p>
+  </div>
+
+  <h3>Woran wir das Ergebnis messen</h3>
+  <div class="keys">
+    <div class="key"><b>Ähnlichkeit (SSIM)</b>Vergleicht Helligkeit, Kontrast und Struktur in kleinen Bildausschnitten. 1,0 heißt identisch. Höher ist besser.</div>
+    <div class="key"><b>Abweichung (MSE)</b>Wie weit jedes Pixel im Schnitt vom Original entfernt ist. Niedriger ist besser.</div>
+    <div class="key"><b>Raster (Nyquist-Leistung)</b>Wie stark Pixel im feinsten Schachbrett-Takt hell und dunkel wechseln. Das Original liegt bei 0,056. Weit darüber heißt: künstliches Muster.</div>
+    <div class="key"><b>Klassen-Treffer (k-NN)</b>Ein einfaches Verfahren schaut, welche Bilder im Merkzettel am nächsten liegen, und rät daraus die Klasse. Blindes Raten träfe 10 %.</div>
+  </div>
+
+  <h3>So liest du die Cluster-Bilder</h3>
+  <p>Jeder Punkt ist ein Bild. Liegen zwei Punkte nah beieinander, hält das Modell die Bilder für ähnlich. Wähle eines der zehn Beispielbilder. Es bekommt einen gelben Rand, und alle Bilder seiner Klasse werden rot. Bilden die roten Punkte eine klare Insel, kann das Modell diese Klasse gut auseinanderhalten. Sind sie überall verstreut, nicht. Die Auswahl gilt für alle Versionen auf dieser Seite. Grau sind alle übrigen der 2.000 Testbilder im Cluster, auch solche aus Klassen, die unter den zehn Beispielbildern nicht vorkommen.</p>
+  <p class="note">Ab v3 hat der Merkzettel mehr als zwei Zahlen. Damit er auf den Bildschirm passt, drückt das Verfahren t-SNE ihn auf zwei Achsen. Es zeigt Nachbarschaften, die Abstände zwischen weit entfernten Gruppen sind nicht aussagekräftig.</p>
+</section>
+
+<section class="version" data-v="v1">
+  <div class="head"><span class="tag">v1</span><h2>Reparieren und ansehen</h2></div>
+  <div class="steps">
+    <div class="step you"><h3>Der Anlass</h3>Das Übungsnotebook brach beim Aufbau mit einer Fehlermeldung ab.</div>
+    <div class="step"><h3>Meine Änderung</h3>Eine Zeile: <code>np.prod(...)</code> gab einen Zahlentyp zurück, den Keras ablehnte. Mit <code>int(...)</code> läuft es. Sonst bleibt alles wie in der Übung.</div>
+    <div class="step"><h3>Was passiert ist</h3>Das Modell läuft, malt aber fast immer dasselbe: helle oder dunkle Verläufe. Mit 2 Zahlen kann es nicht mehr beschreiben.</div>
+  </div>
+</section>
+
+<section class="version" data-v="v2">
+  <div class="head"><span class="tag">v2</span><h2>Umbau zum VAE</h2></div>
+  <div class="steps">
+    <div class="step you"><h3>Der nächste Schritt</h3>Die Übung zum Variational Autoencoder (VAE) aus dem Kurs auf CIFAR-10 übertragen.</div>
+    <div class="step"><h3>Meine Änderung</h3>Der Encoder nennt statt eines festen Punkts eine kleine Wolke, aus der gezogen wird. Das macht den Merkzettel-Raum glatt, sodass man daraus neue Bilder erzeugen kann.</div>
+    <div class="step"><h3>Was passiert ist</h3>Kaum Unterschied und sogar minimal schlechter. Der VAE löst eine andere Aufgabe, nämlich das Erzeugen. Der Engpass blieb bei 2 Zahlen, und genau der war das Problem.</div>
+  </div>
+</section>
+
+<section class="version" data-v="v3">
+  <div class="head"><span class="tag">v3</span><h2>Mehr Platz, mehr Training</h2></div>
+  <div class="steps">
+    <div class="step you"><h3>Deine Überlegung</h3>Im Cluster-Bild ist nur ein riesiger Klumpen zu sehen. Was lässt sich tun, um die Klassifizierung zu verbessern?</div>
+    <div class="step"><h3>Meine Änderung</h3>Engpass von 2 auf 32 Zahlen, eine Rechenstufe mehr, 25 statt 5 Durchgänge, MSE als Prüfer. Dazu t-SNE und die k-NN-Messung, damit wir eine Zahl statt nur eines Eindrucks haben.</div>
+    <div class="step"><h3>Was passiert ist</h3>Der größte Sprung der ganzen Reise: Erstmals sind Motive erkennbar. Bei den Klassen ist es der beste Wert aller Versionen. Aber die Bilder sind sehr weich.</div>
+  </div>
+  <div class="demo">
+    <h3>Warum der MSE-Prüfer weich malt</h3>
+    <p>Das Modell weiß oft nicht genau, wo eine Kante liegt. Liegt sie mal links, mal rechts, bekommt es die kleinste Strafe, wenn es den Durchschnitt malt. Das ist ein Grauverlauf statt einer Kante. Vorsichtig zu bleiben lohnt sich also.</p>
+    <div class="demo-cols">
+      <div><b>Mögliche Kante A</b><div class="cells" data-edge="a"></div></div>
+      <div><b>Mögliche Kante B</b><div class="cells" data-edge="b"></div></div>
+      <div><b>Was MSE belohnt: der Mittelwert</b><div class="cells" data-edge="avg"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="version" data-v="v4">
+  <div class="head"><span class="tag">v4</span><h2>Ein zweiter Prüfer, und die Fraktale kommen</h2></div>
+  <div class="steps">
+    <div class="step you"><h3>Deine Überlegung</h3>Die Bilder sind weiter deutlich unscharf. Nach dem Lauf dann: Sie sind näher am Original, haben aber starke Fraktale und wirken immer noch unscharf.</div>
+    <div class="step"><h3>Meine Änderung</h3>Engpass auf 256 Zahlen. Zusätzlich vergleicht ein fertig trainiertes Bilderkennungsnetz (VGG16) Formen und Texturen. Wegen der CPU nur 10.000 Bilder.</div>
+    <div class="step"><h3>Was passiert ist</h3>Mehr Struktur, aber das Raster ist 16-mal so stark wie im Original. Die neu gemessene Bildschärfe wirkte gut, zeigte aber vor allem das Raster.</div>
+  </div>
+  <p class="note">Von deinem v4-Lauf waren weder Ausgaben noch Modell gespeichert. Die Bilder und Zahlen hier stammen aus einem Nachlauf mit demselben Modell und Prüfer. Einziger Unterschied: Die Zwischenkontrolle nutzte Trainingsbilder statt Testbilder.</p>
+
+  <div class="demo">
+    <h3>Woher das Raster kommt: der Stempel-Effekt</h3>
+    <p>Der alte Decoder vergrößert das Bild wie ein Stempel, der 3 Pixel breit ist, aber nur um 2 Pixel weiterrückt. Jedes zweite Pixel bekommt dadurch doppelt Farbe ab. In beide Richtungen ergibt das ein Schachbrett. Der neue Decoder vergrößert erst gleichmäßig und malt dann mit einem Stempel, der Pixel für Pixel weiterrückt, sodass alle gleich viel abbekommen.</p>
+    <div class="demo-cols">
+      <div><b>Alter Decoder (v1 bis v4)</b><canvas class="mini" id="stampOld" width="16" height="16" aria-label="Schachbrettartiges Überlappungsmuster"></canvas><span class="note">Dunkler heißt mehr Überlappung. Zeigt nur die Überlappung, nicht das fertige Bild.</span></div>
+      <div><b>Neuer Decoder (v5)</b><canvas class="mini" id="stampNew" width="16" height="16" aria-label="Gleichmäßige Fläche"></canvas><span class="note">Überall dieselbe Überlappung, also kein eingebautes Muster.</span></div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <h3>Warum VGG das Raster verstärkt</h3>
+    <p>Der neue Prüfer schaut durch Filter, die Bilder stark verkleinern. Sehr feine Muster sieht er dabei nur schlecht. Sein Urteil zählte zudem am Ende rund zehnmal so viel wie der Pixelvergleich. Das Modell konnte also feines Muster malen, solange die Texturen für den Prüfer ungefähr stimmten. Die Messung passt dazu: Beim alten Decoder lag das Raster mit VGG rund fünfmal höher als ohne. Der Lauf mit VGG hatte allerdings auch weniger Trainingsbilder.</p>
+    <div>
+      <p class="cap note">Oben Original, Mitte v4, unten der Unterschied zum Original, vierfach verstärkt. Je bunter, desto mehr Abweichung.</p>
+      <img class="px" alt="Originale" data-src="original"><img class="px" alt="Rekonstruktionen v4" data-src="v4"><img class="px" alt="Differenz v4" data-src="v4_diff">
+    </div>
+  </div>
+</section>
+
+<section class="version" data-v="v5">
+  <div class="head"><span class="tag">v5</span><h2>Das Modell selbst umbauen</h2></div>
+  <div class="steps">
+    <div class="step you"><h3>Deine Überlegung</h3>Immer noch nicht gut: starke Fraktale, weiter unscharf. Was war noch ungelöst, und was lässt sich sonst optimieren?</div>
+    <div class="step"><h3>Meine Änderung</h3>Neuer Decoder ohne Stempel-Effekt, Merkzettel als Karte (siehe unten), feinere Rechenblöcke, neuer Prüfer aus L1 und SSIM, Engpass 512, mehr verschiedene Trainingsbilder (30.000).</div>
+    <div class="step"><h3>Was passiert ist</h3>Fraktale verschwunden. Bei den 10 Beispielbildern sind Schiff, Auto und Frosch klar zu erkennen, sogar die rote Schrift. Beim Sortieren nach Klassen wurde es schlechter als in v3.</div>
+  </div>
+
+  <div class="demo">
+    <h3>Der wichtigste Umbau: Karte statt Zusammenfassung</h3>
+    <p>Bisher quetschte das Modell das Bild erst auf ein Raster von 2×2 Feldern und dann in eine lange Liste. Jede Information über den Ort musste diesen Umweg überleben. Jetzt bleibt der Merkzettel eine grobe Karte mit 8×8 Feldern. In jedem Feld stehen ein paar Zahlen darüber, was genau dort im Bild ist. Die Gesamtzahl kann dabei gleich bleiben: 8×8×4 sind 256 Zahlen, wie bei v4.</p>
+    <div class="grids">
+      <div><div class="gridbox" id="g2"></div><b>Alt: 2×2 Felder</b>Viel Inhalt, kaum Ort</div>
+      <div><div class="gridbox" id="g8"></div><b>Neu: 8×8 Felder</b>Weniger Inhalt pro Feld, aber mit Ort</div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <h3>Der neue Prüfer: L1 und SSIM</h3>
+    <p>L1 bestraft Abweichungen gleichmäßiger als MSE. Das macht den Durchschnitts-Trick aus v3 weniger attraktiv. SSIM schaut wie ein Mensch eher auf Struktur in kleinen Ausschnitten. Beide rechnen direkt auf den Pixeln, sodass dem Prüfer feine Muster nicht entgehen. Der Prüfer selbst rechnet zudem viel schneller, weil er kein großes Zusatznetz braucht. Genauer erklärt im <a href="#anhang">Anhang</a>.</p>
+  </div>
+
+  <div>
+    <p class="cap note">Oben Original, Mitte v5, unten der Unterschied zum Original, vierfach verstärkt, in gleicher Darstellung wie bei v4.</p>
+    <img class="px" alt="Originale" data-src="original"><img class="px" alt="Rekonstruktionen v5" data-src="v5"><img class="px" alt="Differenz v5" data-src="v5_diff">
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Selbst vergleichen</div>
+  <h2>Ein Bild durch alle Versionen</h2>
+  <p>Wähle eines der zehn Testbilder. Das Modell hat diese Bilder beim Training nie gesehen.</p>
+  <div class="compare">
+    <div class="pick" id="pick"></div>
+    <div class="big" id="big"></div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Alle Versionen im Vergleich</div>
+  <h2>Sortiert das Modell nach Klassen?</h2>
+  <p>Kaum, in keiner Version. Einzelne Klassen rücken etwas zusammen, klare Inseln entstehen nicht. Das liegt am Ziel: Das Modell soll nur gut nachmalen und erfährt nie, was eine Klasse ist. Ein rotes und ein weißes Auto haben keinen Grund, nah beieinander zu liegen.</p>
+  <div class="ctl" id="chips"></div>
+  <p class="note">Rot sind alle Bilder derselben Klasse, der gelbe Rand zeigt das gewählte Bild. Grau sind alle übrigen Testbilder.</p>
+  <div class="multi" id="multi"></div>
+  <div class="chart">
+    <h3>Klassen-Treffer auf Basis des Merkzettels</h3>
+    <div class="squeeze" id="knn"></div>
+    <p class="note">Gleiche Messung auf 5.000 Testbildern, nur 4.000 davon zum Vergleichen. v5 merkt sich mehr darüber, wo was im Bild liegt, und liegt damit wohl näher an den rohen Pixeln. Das ist eine Vermutung und nicht gemessen.</p>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Zusammenfassung</div>
+  <h2>Was am meisten gebracht hat</h2>
+  <div class="chart">
+    <h3>Ähnlichkeit zum Original nach Version (SSIM, 1,0 = identisch)</h3>
+    <div class="squeeze" id="ssim"></div>
+  </div>
+  <div class="chart">
+    <h3>Raster: künstliches Schachbrettmuster (Original = 0,056)</h3>
+    <div class="squeeze" id="ras"></div>
+  </div>
+
+  <div class="rank">
+    <div><span class="n">1</span><h3>Mehr Zahlen im Engpass: von 2 auf 32 (v1 zu v3)</h3>
+      <p>SSIM von 0,17 auf 0,51, Abweichung 69 % kleiner. Erst dadurch entsteht ein erkennbares Bild. Das ist die Telefon-Regel: Mit zwei Wörtern lässt sich kein Bild beschreiben, egal wie gut die Person zuhört. In diesem Schritt änderten sich auch Tiefe, Prüfer und Trainingsdauer, der Anteil des Engpasses allein ist also nicht sauber getrennt.</p></div>
+    <div><span class="n">2</span><h3>Neue Architektur: Decoder und Karte (A1 zu R1)</h3>
+      <p>Der größte sauber gemessene Einzelhebel und die Lösung deines Fraktal-Problems. Bei gleichem Prüfer, gleichen 256 Zahlen, gleichen Bildern und gleicher Schrittzahl: Abweichung 62 % kleiner, SSIM +0,135, Raster auf ein Zehntel. Vermutlich wichtig: Das Modell musste nicht länger den Ort durch einen 2×2-Engpass retten. Welcher Teil des Umbaus wie viel beitrug, habe ich nicht einzeln gemessen.</p></div>
+    <div><span class="n">3</span><h3>Der neue Prüfer L1 + SSIM (A2 zu A1)</h3>
+      <p>Auf dem alten Decoder: SSIM +0,10, Raster halbiert, Abweichung 8 % kleiner. Hilfreich und billig, aber er allein hätte die Fraktale nicht beseitigt.</p></div>
+    <div><span class="n">4</span><h3>Noch mehr Zahlen: von 256 auf 512 (R1 zu v5)</h3>
+      <p>SSIM +0,036, Abweichung rund 27 % kleiner. Sichtbar, zum Beispiel an der Schrift auf Bild 4.</p></div>
+  </div>
+
+  <h3>Was wenig oder nichts brachte</h3>
+  <ul>
+    <li><b>VAE (v2):</b> SSIM und Abweichung praktisch unverändert. Er ist für eine andere Aufgabe gebaut.</li>
+    <li><b>VGG-Prüfer:</b> Auf dem alten Decoder etwas mehr Struktur (SSIM +0,03), aber rund fünfmal mehr Raster. Auf dem neuen Decoder fast kein Effekt. Das Nachtraining dort war mit 300 Schritten kurz, ein voller Lauf könnte anders ausgehen.</li>
+    <li><b>Die Kennzahl Laplace-Schärfe aus v4:</b> Sie bewertete v4 besser als v5, obwohl v4 sichtbar schlechter ist. Sie misst Kanten, egal ob echt oder Muster.</li>
+  </ul>
+
+  <h3>Alle Zahlen im Überblick</h3>
+  <div class="tablewrap"><table id="table"></table></div>
+  <p class="note">Testset mit 10.000 Bildern. R0 ist die v4-Nachstellung. A1, A2 und R1 hatten dieselben 30.000 Bilder und 1.500 Schritte. v3 hatte etwa 12.500 Schritte, deshalb ist der Vergleich v3 zu A2 nicht fair und hier nicht als eigene Stufe gewertet.</p>
+
+  <h3>Wo es noch hakt</h3>
+  <ul>
+    <li><b>Nicht fotoscharf.</b> Feine Texturen wie Fell oder Blätter fehlen weiterhin.</li>
+    <li><b>Eine einfache Rechenmethode liegt noch vorn.</b> PCA, ein klassisches lineares Verfahren, erreicht bei 512 Zahlen eine halb so große Abweichung. Das Ziel, mindestens mit PCA gleichzuziehen, ist verfehlt.</li>
+    <li><b>Kurzes Training.</b> v5 hatte nur 1.500 Schritte auf der CPU. Ob längeres Training den Abstand schließt, ist offen.</li>
+    <li><b>Klassen schlechter als in v3.</b> Bildqualität und Sortieren nach Klassen sind verschiedene Ziele.</li>
+  </ul>
+
+  <h3>Sinnvolle nächste Schritte</h3>
+  <ul>
+    <li><b>Für schärfere Bilder:</b> Erst auf dem schnelleren Rechner länger trainieren. Danach ein Adversarial-Prüfer, also ein zweites Netz, das Fälschungen von echten Bildern unterscheiden lernt.</li>
+    <li><b>Für Klassen:</b> Dem Modell die Klassen im Training zeigen, etwa mit einem zusätzlichen Klassifikator am Engpass. Das wäre ein eigenes v6.</li>
+  </ul>
+</section>
+
+<section id="anhang">
+  <div class="eyebrow">Anhang</div>
+  <h2>L1, SSIM und VGG genau erklärt</h2>
+  <p class="lead">Ja, alle drei können Teil der Optimierungsfunktion sein. Sie heißt auch Loss und ist die Note, die das Modell nach jedem Bild-Stapel bekommt und im Training senken soll. Im finalen v5 stecken nur L1 und SSIM. VGG war in v4 dabei und wurde für v5 entfernt.</p>
+
+  <h3>Wo der Loss im Training sitzt</h3>
+  <div class="loop">
+    <div class="loopstep"><b>1. Nachmalen</b>Das Modell malt 100 Bilder nach.</div>
+    <div class="loopstep hl"><b>2. Benoten (Loss)</b>L1 und SSIM vergleichen mit dem Original und ergeben eine einzige Zahl.</div>
+    <div class="loopstep"><b>3. Ursache suchen</b>Backpropagation rechnet für jeden Regler aus, ob die Note besser wird, wenn er nach oben oder unten geht.</div>
+    <div class="loopstep"><b>4. Regler drehen</b>Der Optimierer Adam verstellt alle rund 974.000 Regler ein kleines Stück.</div>
+  </div>
+  <p>Diese Runde lief in v5 1.500-mal. Der Loss legt also fest, was als gut gilt. Adam legt fest, wie die Regler verstellt werden. Deshalb verändert ein anderer Loss das Ergebnis so stark: Das Modell lernt genau das, was benotet wird, auch wenn das im Bild schlecht aussieht.</p>
+
+  <div class="tablewrap"><table>
+    <thead><tr><th>Version</th><th>Formel der Note</th><th>Was zählt</th></tr></thead>
+    <tbody>
+      <tr><td>v1</td><td><code>BCE</code></td><td class="w">Pixelvergleich, eine weitere Formel namens Binary Cross-Entropy</td></tr>
+      <tr><td>v2</td><td><code>BCE + KL</code></td><td class="w">Pixelvergleich, dazu eine Strafe, die den Merkzettel-Raum glatt hält</td></tr>
+      <tr><td>v3</td><td><code>MSE</code></td><td class="w">Pixelvergleich, quadriert</td></tr>
+      <tr><td>v4</td><td><code>MSE + 0,000001 × VGG</code></td><td class="w">Pixelvergleich und Vergleich im Blick des Bilderkennungsnetzes</td></tr>
+      <tr class="hl"><td>v5</td><td><code>L1 + 0,2 × (1 − SSIM)</code></td><td class="w">Pixelvergleich und Struktur in kleinen Ausschnitten</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Das kurze VGG-Nachtraining R2 nutzte zusätzlich eine normierte VGG-Variante und eine Glättungsstrafe. Die Kennzahlen Raster und Klassen-Treffer sowie Laplace-Schärfe gehen nie in den Loss ein, sie messen nur hinterher. SSIM und MSE sind auf dieser Seite auch Messwerte. In der Messung nutzt SSIM Fenster von 11×11 Pixeln, im v5-Training 7×7.</p>
+
+  <div class="demo" id="l1demo">
+    <h3>L1: der gerade Pixelvergleich</h3>
+    <p>Für jedes Pixel und jeden Farbkanal: Wie weit liegt der gemalte Wert vom Original entfernt? Davon der Durchschnitt. Ein Pixel mit 0,8 im Original und 0,5 im Nachbild kostet 0,3. MSE quadriert diesen Abstand vorher und kommt auf 0,09.</p>
+    <p class="formula">L1 = Durchschnitt von |Original − Nachbild|<br>MSE = Durchschnitt von (Original − Nachbild)²</p>
+    <p><b>Was das Quadrieren ändert:</b> Bei vier Pixeln mit den Fehlern 0,1, 0,1, 0,1 und 0,5 macht der große Fehler bei L1 knapp zwei Drittel der Summe aus, bei MSE rund 89 %. MSE achtet also vor allem darauf, große Fehler zu vermeiden. Das führt zum vorsichtigen Grau.</p>
+    <p><b>Probier es aus:</b> Ein Pixel ist je zur Hälfte schwarz (0) oder weiß (1), weil das Modell die Kante nicht genau orten kann. Welchen Grauwert soll es malen?</p>
+    <div class="ctl"><label for="gray">Gemalter Wert</label><input id="gray" type="range" min="0" max="100" value="50"><span id="grayVal" class="mono"></span><span id="graySwatch" class="swatch"></span></div>
+    <div class="squeeze" id="grayBars"></div>
+    <p>MSE ist bei Grau am niedrigsten und belohnt damit das Verwischen. L1 ist bei jedem Wert gleich, zwingt also nicht zu Grau. Wenn eine Seite wahrscheinlicher ist, wählt L1 diese Seite und MSE einen Mischwert. Allein bringt L1 trotzdem keine Schärfe, es nimmt nur einen Grund für Unschärfe weg.</p>
+  </div>
+
+  <div class="demo">
+    <h3>SSIM: Stimmt die Struktur?</h3>
+    <p>SSIM vergleicht keine einzelnen Pixel. Es schiebt ein kleines Fenster von 7×7 Pixeln über das Bild, mit Gewicht auf der Fenstermitte, und stellt an jeder Stelle drei Fragen:</p>
+    <div class="keys">
+      <div class="key"><b>Helligkeit</b>Ist der Ausschnitt im Mittel gleich hell?</div>
+      <div class="key"><b>Kontrast</b>Schwanken die Werte gleich stark? Verwischen senkt das.</div>
+      <div class="key"><b>Struktur</b>Sind helle und dunkle Stellen am selben Ort? Ein fremdes Muster senkt das.</div>
+    </div>
+    <p>Die drei Antworten liegen meist nahe bei 1 und werden multipliziert. Daraus entsteht der Wert für dieses Fenster. Der Durchschnitt aller Fenster und Farbkanäle ergibt den SSIM-Wert. Weil 1 das Beste ist und der Loss sinken soll, steht im Loss <code>1 − SSIM</code>.</p>
+    <p><b>Darum hilft das:</b> Unten hat jede Störung exakt dieselbe MSE. Für einen reinen Pixelvergleich sind sie fast gleich schlimm, SSIM unterscheidet sie klar.</p>
+    <div class="ssimgrid" id="ssimgrid"></div>
+    <p class="note">Selbst gerechnet an einem künstlichen Muster, vereinfacht mit einem einzigen Fenster über den ganzen Ausschnitt. Das zeigt das Prinzip, ist aber nicht der genaue Trainingswert. Auch SSIM ist nicht perfekt: Hier wirkt das Raster milder als die Unschärfe.</p>
+  </div>
+
+  <div class="demo">
+    <h3>VGG: Vergleich im Blick eines Bilderkennungsnetzes</h3>
+    <p>VGG16 ist ein fertiges Netz, das auf Millionen Fotos gelernt hat, Objekte zu erkennen. Es wird nicht weitertrainiert. In v4 lief es so:</p>
+    <ol>
+      <li>Original und Nachbild laufen getrennt durch VGG.</li>
+      <li>An drei Stellen im Netz lesen wir die Zwischenergebnisse aus. Das sind Stapel von Merkmalskarten: insgesamt 448 Karten, 32×32, 16×16 und 8×8 Felder groß.</li>
+      <li>Für jede Stelle: Durchschnitt der quadrierten Unterschiede. Davon wieder der Durchschnitt.</li>
+      <li>Weil diese Werte riesig sind, werden sie mit 0,000001 multipliziert und zur MSE addiert.</li>
+    </ol>
+    <p>VGG selbst lernt nichts dazu. Die Rückmeldung läuft aber durch VGG hindurch zu unseren Reglern.</p>
+    <p><b>So sehen echte Merkmalskarten aus,</b> hier vom Frosch. Hell heißt: Diese Karte reagiert dort stark.</p>
+    <div class="tablewrap"><table class="feat">
+      <thead><tr><th>Stelle im Netz</th><th>Eingabe Original</th><th>Eingabe v4</th><th>Eingabe v5</th></tr></thead>
+      <tbody id="featBody"></tbody>
+    </table></div>
+    <p class="note">Von 448 Karten sind hier 3 zu sehen, jeweils die mit der größten Schwankung im Original. Die Karten sind stark vergrößert. Die untere Reihe zeigt vor allem den Bildrand, weil das kleine 32×32-Bild VGG am Ende kaum noch Fläche lässt.</p>
+    <p><b>Was daran auffällt:</b> In diesen drei Karten ist das feine Raster von v4 kaum zu erkennen. Das passt zu der Erklärung, dass VGG sehr feine Muster schlecht sieht und dieses Raster deshalb kaum bestraft. Bewiesen ist es damit nicht, denn es sind nur 3 von 448 Karten bei einem Bild.</p>
+  </div>
+
+  <div class="demo">
+    <h3>Die Noten am echten Frosch</h3>
+    <div class="tablewrap"><table id="frogTable"></table></div>
+    <p>Die Spalten zeigen die beiden Nachbilder, die markierten Zeilen die Note nach der jeweiligen Formel. Beide Formeln ergeben für das v5-Nachbild die bessere Note, obwohl v5 nie mit VGG trainiert wurde. Das ist ein einzelnes Bild und kein Gesamtergebnis. Noten aus verschiedenen Formeln dürfen nicht miteinander verglichen werden, nur Bilder innerhalb einer Formel.</p>
+  </div>
+
+  <div class="keys">
+    <div class="key"><b>L1</b>Prüft: Stimmt jedes Pixel?<br>Stärke: Einfach, weniger Drang zum Grau.<br>Schwäche: Sieht keine Struktur.</div>
+    <div class="key"><b>SSIM</b>Prüft: Stimmt Struktur im Ausschnitt?<br>Stärke: Merkt Verwischen und fremde Muster.<br>Schwäche: Sagt wenig über die Farbtreue großer Flächen, deshalb die Kombination mit L1.</div>
+    <div class="key"><b>VGG</b>Prüft: Sieht es für ein Erkennungsnetz gleich aus?<br>Stärke: Kann Texturen und Formen belohnen.<br>Schwäche: Teuer, kann feine Muster übersehen, für kleine Bilder nicht gebaut.</div>
+  </div>
+</section>
+
+</div>
+
+<script>
+const DATA = {{DATA}};
+const IMG = {{IMG}};
+const EXTRA = {{EXTRA}};
+const FEAT = {{FEAT}};
+const CLASSES = ["Flugzeug","Auto","Vogel","Katze","Hirsch","Hund","Frosch","Pferd","Schiff","Lastwagen"];
+// Echte CIFAR-10-Labels der zehn Beispielbilder (x_test[:10]).
+const SAMPLE_LABELS = [3,8,8,0,6,6,1,6,3,1];
+const NAMES = {v1:"v1", v2:"v2 VAE", v3:"v3", v4:"v4", v5:"v5"};
+const CAP = {v1:"2 Zahlen", v2:"2 Zahlen", v3:"32 Zahlen", v4:"256 Zahlen", v5:"512 Zahlen"};
+const de = (x, d) => x.toLocaleString("de-DE", {minimumFractionDigits:d, maximumFractionDigits:d}).replace(/[’']/g, ".");
+const pct = x => de(x*100, 1) + " %";
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+
+function setTile(t, name, i) {
+  t.style.backgroundImage = `url(${IMG[name]})`;
+  t.style.backgroundPosition = `${i * 100 / 9}% 0`;
+}
+document.querySelectorAll(".tile[data-strip]").forEach(t => setTile(t, t.dataset.strip, +t.dataset.i));
+document.querySelectorAll("img[data-src]").forEach(i => { i.src = IMG[i.dataset.src]; });
+
+const hero = document.getElementById("hero");
+[["original","Original","3.072 Zahlen"],["v1","v1","2 Zahlen"],["v2","v2","2 Zahlen, VAE"],["v3","v3","32 Zahlen"],["v4","v4","256 Zahlen"],["v5","v5","512 Zahlen"]].forEach(([k,n,c]) => {
+  const f = el("figure"); const t = el("div","tile"); setTile(t,k,7);
+  f.append(t, el("figcaption","",`<b>${n}</b><br>${c}`)); hero.append(f);
+});
+
+function bars(id, rows, max, fmt) {
+  const host = document.getElementById(id);
+  rows.forEach(r => {
+    const row = el("div", "bar-row " + (r.cls||""));
+    row.title = `${r.name}: ${fmt(r.v)}`;
+    row.append(el("span","name",r.name));
+    const tr = el("div","track"); const fl = el("div","fill"); fl.style.width = (r.v/max*100) + "%"; tr.append(fl);
+    row.append(tr, el("span","val",fmt(r.v)));
+    host.append(row);
+  });
+}
+bars("squeeze", [{name:"Original",v:3072,cls:"ref"},{name:"v5",v:512,cls:"best"},{name:"v4",v:256},{name:"v3",v:32},{name:"v1 und v2",v:2}], 3072, x => x.toLocaleString("de-DE").replace(/[’']/g,"."));
+
+const V = DATA.versions;
+bars("ssim", [
+  {name:"v1",v:V.v1.ssim},{name:"v2 VAE",v:V.v2.ssim},{name:"v3",v:V.v3.ssim},{name:"v4",v:V.v4.ssim},
+  {name:"v5",v:V.v5.ssim,cls:"best"},{name:"PCA 512 zum Vergleich",v:EXTRA.pca512.ssim,cls:"ref"}], 1, x => de(x,3));
+bars("ras", [
+  {name:"Original",v:EXTRA.original.nyquist_power,cls:"ref"},{name:"v1",v:V.v1.nyquist_power},{name:"v2 VAE",v:V.v2.nyquist_power},{name:"v3",v:V.v3.nyquist_power},
+  {name:"v4",v:V.v4.nyquist_power,cls:"warn"},{name:"v5",v:V.v5.nyquist_power,cls:"best"}], V.v4.nyquist_power, x => de(x,3));
+bars("knn", [
+  {name:"Raten",v:.1,cls:"ref"},{name:"v1",v:V.v1.knn},{name:"v2 VAE",v:V.v2.knn},{name:"v3",v:V.v3.knn,cls:"best"},{name:"v4",v:V.v4.knn},{name:"v5",v:V.v5.knn},{name:"Rohe Pixel",v:.269,cls:"ref"}], .5, pct);
+
+// Cluster
+let currentImage = 7;
+let current = SAMPLE_LABELS[currentImage];
+const canvases = [];
+function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function draw() {
+  const dot = css("--dot"), hit = css("--hit");
+  canvases.forEach(({c, v}) => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2), w = c.clientWidth || 300;
+    c.width = w*dpr; c.height = w*dpr;
+    const g = c.getContext("2d"), pts = V[v].points, r = Math.max(1.1, w/230)*dpr, pad = 10*dpr, sc = (w*dpr-2*pad)/999;
+    g.clearRect(0,0,c.width,c.height);
+    const plot = (want, color) => { g.fillStyle = color; pts.forEach((p,i) => { if ((DATA.labels[i]===current)===want) { g.beginPath(); g.arc(pad+p[0]*sc, pad+(999-p[1])*sc, want ? r*1.5 : r, 0, 7); g.fill(); } }); };
+    plot(false, dot); plot(true, hit);
+    {
+      const q = V[v].sample[currentImage], x = pad+q[0]*sc, y = pad+(999-q[1])*sc, R = r*4;
+      g.beginPath(); g.arc(x, y, r*1.5, 0, 7); g.fillStyle = hit; g.fill();
+      g.beginPath(); g.arc(x, y, R, 0, 7); g.lineWidth = 4.5*dpr; g.strokeStyle = css("--fg"); g.stroke();
+      g.beginPath(); g.arc(x, y, R, 0, 7); g.lineWidth = 3*dpr; g.strokeStyle = "#ffd400"; g.stroke();
+    }
+  });
+  document.querySelectorAll("select.cls").forEach(s => { s.value = currentImage; });
+  document.querySelectorAll("#chips button").forEach((b,i) => b.setAttribute("aria-pressed", i===currentImage));
+  document.querySelectorAll(".clsname").forEach(s => { s.textContent = CLASSES[current]; });
+  document.querySelectorAll(".ringnote").forEach(s => { s.textContent = `Gelber Rand = Bild ${currentImage+1}`; });
+}
+function setImage(i) { currentImage = i; current = SAMPLE_LABELS[i]; draw(); }
+
+function clusterCanvas(v) {
+  const c = el("canvas","cluster");
+  c.setAttribute("role","img"); c.setAttribute("aria-label",`Cluster-Bild für ${NAMES[v]}`);
+  canvases.push({c,v});
+  return c;
+}
+
+const STATS = v => `<div class="stats">
+  <div class="stat"><b>${de(V[v].ssim,3)}</b>Ähnlichkeit</div>
+  <div class="stat"><b>${de(V[v].mse,4)}</b>Abweichung</div>
+  <div class="stat"><b>${de(V[v].nyquist_power,3)}</b>Raster</div>
+  <div class="stat"><b>${pct(V[v].knn)}</b>Klassen-Treffer</div></div>`;
+
+document.querySelectorAll("section.version").forEach(sec => {
+  const v = sec.dataset.v;
+  const vis = el("div","visuals");
+  const left = el("div","panel");
+  left.innerHTML = `<div class="cap">Oben Original, unten ${NAMES[v]} (${CAP[v]})</div>`;
+  ["original", v].forEach(n => { const i = el("img","px"); i.src = IMG[n]; i.alt = n==="original" ? "Originalbilder" : `Rekonstruktionen ${NAMES[v]}`; left.append(i); });
+  left.insertAdjacentHTML("beforeend", `<div class="cap">Von links: ${SAMPLE_LABELS.map(l => CLASSES[l]).join(", ")}</div>`);
+  left.insertAdjacentHTML("beforeend", STATS(v));
+  const right = el("div","panel");
+  right.innerHTML = `<div class="ctl"><label>Bild im Cluster <select class="cls"></select></label></div>`;
+  right.querySelector("select").innerHTML = SAMPLE_LABELS.map((l,i)=>`<option value="${i}">Bild ${i+1}: ${CLASSES[l]}</option>`).join("");
+  right.querySelector("select").id = "cls-"+v;
+  right.querySelector("label").htmlFor = "cls-"+v;
+  right.querySelector("select").addEventListener("change", e => setImage(+e.target.value));
+  right.append(clusterCanvas(v));
+  right.insertAdjacentHTML("beforeend", `<div class="cap">Cluster: rot = <span class="clsname"></span>, grau = alle anderen<br><span class="ringnote"></span></div>`);
+  vis.append(left, right);
+  sec.querySelector(".steps").after(vis);
+});
+
+const chips = document.getElementById("chips");
+SAMPLE_LABELS.forEach((l,i) => { const b = el("button","",`Bild ${i+1}: ${CLASSES[l]}`); b.type="button"; b.addEventListener("click",()=>setImage(i)); chips.append(b); });
+const multi = document.getElementById("multi");
+["v1","v2","v3","v4","v5"].forEach(v => {
+  const p = el("div","panel"); p.append(el("div","cap",`<b>${NAMES[v]}</b>, ${CAP[v]}`)); p.append(clusterCanvas(v)); multi.append(p);
+});
+
+// Bildvergleich
+const pick = document.getElementById("pick"), big = document.getElementById("big");
+const CMP = [["original","Original","3.072 Zahlen"],["v1","v1","2 Zahlen"],["v2","v2","2 Zahlen, VAE"],["v3","v3","32 Zahlen"],["v4","v4","256 Zahlen, Raster"],["v5_256","v5 klein","256 Zahlen"],["v5","v5","512 Zahlen"]];
+const bigT = CMP.map(([k,n,c]) => { const f = el("figure"); const t = el("div","tile"); f.append(t, el("figcaption","",`<b>${n}</b><br>${c}`)); big.append(f); return [t,k]; });
+function show(i) {
+  bigT.forEach(([t,k]) => setTile(t,k,i));
+  pick.querySelectorAll("button").forEach((b,j) => b.setAttribute("aria-pressed", j===i));
+}
+for (let i=0;i<10;i++) { const b = el("button"); b.type="button"; b.setAttribute("aria-label",`Bild ${i+1}: ${CLASSES[SAMPLE_LABELS[i]]}`); b.title = CLASSES[SAMPLE_LABELS[i]]; const t = el("div","tile"); setTile(t,"original",i); b.append(t); b.addEventListener("click",()=>show(i)); pick.append(b); }
+show(7);
+
+// Tabelle
+const rows = [
+  ["v1","Übung repariert","2",V.v1],["v2","VAE","2",V.v2],["v3","tiefer, MSE","32",V.v3],
+  ["R0 (v4)","alter Decoder, MSE + VGG, 10.000 Bilder","256",EXTRA.R0],
+  ["A2","alter Decoder, MSE","256",EXTRA.A2],["A1","alter Decoder, L1 + SSIM","256",EXTRA.A1],
+  ["R1","neue Architektur, L1 + SSIM","256",EXTRA.R1],["R2","R1 + 300 Schritte VGG","256",EXTRA.R2],
+  ["v5","neue Architektur, L1 + SSIM","512",V.v5,"hl"],["PCA 512","klassisches Vergleichsverfahren","512",EXTRA.pca512]];
+document.getElementById("table").innerHTML = `<thead><tr><th>Lauf</th><th>Was</th><th>Zahlen</th><th>SSIM</th><th>Abweichung</th><th>Raster</th></tr></thead><tbody>` +
+  rows.map(([a,b,c,m,h]) => `<tr class="${h||""}"><td>${a}</td><td class="w">${b}</td><td>${c}</td><td>${de(m.ssim,3)}</td><td>${de(m.mse,5)}</td><td>${de(m.nyquist_power,3)}</td></tr>`).join("") + "</tbody>";
+
+// Kante und Stempel
+document.querySelectorAll(".cells").forEach(h => {
+  const mode = h.dataset.edge, n = 16;
+  h.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+  const a = x => x < 6 ? 0 : 1, b = x => x < 10 ? 0 : 1;
+  for (let x=0;x<n;x++) { const v = mode==="a" ? a(x) : mode==="b" ? b(x) : (a(x)+b(x))/2; const i = el("i"); const g = Math.round(40+v*190); i.style.background = `rgb(${g},${g},${g})`; h.append(i); }
+});
+function stamp(id, ov) {
+  const c = document.getElementById(id), g = c.getContext("2d");
+  for (let y=0;y<16;y++) for (let x=0;x<16;x++) { const v = ov(x)*ov(y); const s = Math.round(235-(v-1)*55); g.fillStyle = `rgb(${s},${s},${s})`; g.fillRect(x,y,1,1); }
+}
+stamp("stampOld", x => x%2 ? 2 : 1);
+stamp("stampNew", () => 1);
+function gridbox(id,n) { const h = document.getElementById(id); h.style.gridTemplateColumns = `repeat(${n},1fr)`; for (let i=0;i<n*n;i++) h.append(el("i")); }
+gridbox("g2",2); gridbox("g8",8);
+
+// Anhang: L1 gegen MSE
+const grayIn = document.getElementById("gray"), grayBars = document.getElementById("grayBars");
+function updateGray() {
+  const g = +grayIn.value / 100, l1 = .5, ms = (g*g + (1-g)*(1-g)) / 2;
+  document.getElementById("grayVal").textContent = de(g,2);
+  const s = Math.round(g*255); document.getElementById("graySwatch").style.background = `rgb(${s},${s},${s})`;
+  grayBars.innerHTML = "";
+  bars("grayBars", [{name:"L1-Strafe",v:l1},{name:"MSE-Strafe",v:ms,cls:"warn"}], .5, x => de(x,3));
+}
+grayIn.addEventListener("input", updateGray);
+updateGray();
+
+// Anhang: SSIM bei gleicher MSE
+(function () {
+  const N = 24, P = [];
+  for (let y=0;y<N;y++) { P[y]=[]; for (let x=0;x<N;x++) P[y][x] = .5 + .17*Math.sin(2*Math.PI*x/6) + .17*Math.sin(2*Math.PI*(x+y)/12); }
+  const map = f => P.map((r,y) => r.map((v,x) => f(v,x,y)));
+  const at = (x,y) => P[(y+N)%N][(x+N)%N];
+  const blur = map((v,x,y) => { let s=0; for (let j=-2;j<=2;j++) for (let i=-2;i<=2;i++) s+=at(x+i,y+j); return s/25; });
+  const mseOf = a => { let s=0; a.forEach((r,y) => r.forEach((v,x) => s+=(v-P[y][x])**2)); return s/N/N; };
+  const m = mseOf(blur), d = Math.sqrt(m);
+  const cases = [
+    ["Original", P],
+    ["Heller", map(v => v+d)],
+    ["Fremdes Raster", map((v,x,y) => v+((x+y)%2 ? d : -d))],
+    ["Verwischt", blur],
+  ];
+  function parts(b) {
+    const f=P.flat(), g=b.flat(), n=f.length, ma=f.reduce((p,c)=>p+c)/n, mb=g.reduce((p,c)=>p+c)/n;
+    let va=0, vb=0, co=0; f.forEach((v,i) => { va+=(v-ma)**2; vb+=(g[i]-mb)**2; co+=(v-ma)*(g[i]-mb); }); va/=n; vb/=n; co/=n;
+    const C1=1e-4, C2=9e-4, C3=C2/2, sa=Math.sqrt(va), sb=Math.sqrt(vb);
+    const l=(2*ma*mb+C1)/(ma*ma+mb*mb+C1), c=(2*sa*sb+C2)/(va+vb+C2), s=(co+C3)/(sa*sb+C3);
+    return {l,c,s,ssim:l*c*s};
+  }
+  const host = document.getElementById("ssimgrid");
+  cases.forEach(([name,a],k) => {
+    const box = el("div","ssimcase");
+    const c = el("canvas","mini"); c.width=N; c.height=N; const g=c.getContext("2d");
+    c.setAttribute("role","img"); c.setAttribute("aria-label",name);
+    a.forEach((r,y) => r.forEach((v,x) => { const s=Math.max(0,Math.min(255,Math.round(v*255))); g.fillStyle=`rgb(${s},${s},${s})`; g.fillRect(x,y,1,1); }));
+    box.append(el("b","",name), c);
+    if (k) { const p = parts(a);
+      box.append(el("div","mono",`MSE ${de(mseOf(a),4)}<br>Helligkeit ${de(p.l,2)}<br>Kontrast ${de(p.c,2)}<br>Struktur ${de(p.s,2)}<br><b>SSIM ${de(p.ssim,2)}</b>`));
+    } else box.append(el("div","mono","Referenz<br>SSIM 1,00"));
+    host.append(box);
+  });
+})();
+
+// Anhang: echte Merkmalskarten und Noten
+const featBody = document.getElementById("featBody");
+FEAT.layers.forEach((l,i) => {
+  const tr = el("tr");
+  tr.append(el("td","w",`<b>${["Früh","Mitte","Spät"][i]}</b><br>${l.size}×${l.size} Felder, ${l.channels} Karten`));
+  ["original","v4","v5"].forEach(k => { const td = el("td"); const im = el("img","px featimg"); im.src = IMG[`feat${i}_${k}`]; im.alt = `Merkmalskarte ${["früh","mitte","spät"][i]} für ${k}`; td.append(im); tr.append(td); });
+  featBody.append(tr);
+});
+const f4 = FEAT.v4, f5 = FEAT.v5, noteNew = x => x.l1 + .2*(1-x.ssim7), noteOld = x => x.mse + x.vgg_weighted;
+document.getElementById("frogTable").innerHTML = `<thead><tr><th>Baustein</th><th>Nachbild v4</th><th>Nachbild v5</th></tr></thead><tbody>
+  <tr><td>L1</td><td>${de(f4.l1,4)}</td><td>${de(f5.l1,4)}</td></tr>
+  <tr><td>SSIM</td><td>${de(f4.ssim7,3)}</td><td>${de(f5.ssim7,3)}</td></tr>
+  <tr class="hl"><td>Note nach v5-Formel: L1 + 0,2 × (1 − SSIM)</td><td>${de(noteNew(f4),4)}</td><td>${de(noteNew(f5),4)}</td></tr>
+  <tr><td>MSE</td><td>${de(f4.mse,4)}</td><td>${de(f5.mse,4)}</td></tr>
+  <tr><td>VGG-Wert, roh</td><td>${Math.round(f4.vgg_raw).toLocaleString("de-DE").replace(/[’']/g,".")}</td><td>${Math.round(f5.vgg_raw).toLocaleString("de-DE").replace(/[’']/g,".")}</td></tr>
+  <tr class="hl"><td>Note nach v4-Formel: MSE + 0,000001 × VGG</td><td>${de(noteOld(f4),4)}</td><td>${de(noteOld(f5),4)}</td></tr></tbody>`;
+
+draw();
+window.addEventListener("resize", draw);
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+</script>
