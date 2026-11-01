@@ -2,9 +2,9 @@
 
 Ein Autoencoder auf CIFAR-10, Schritt für Schritt von v1 bis v6 verbessert. Entstanden im CAS Generative AI, Modul 2, Tag 3.
 
-[![Vorschau der Erklärseite: anklicken für die interaktive Fassung](docs/vorschau.png)](https://trosinde.github.io/cas_module_2_day3_encoder_decoder/)
+[![Vorschau der Erklärseite: anklicken für die interaktive Fassung](docs/vorschau.png)](https://claude.ai/artifact/HvTcvwZd3tdFHB2sB4nnF6)
 
-**[Zur interaktiven Erklärseite](https://trosinde.github.io/cas_module_2_day3_encoder_decoder/)** mit Bildvergleich, Cluster-Bildern und Erklärungen zu jeder Version.
+**[Zur interaktiven Erklärseite](https://claude.ai/artifact/HvTcvwZd3tdFHB2sB4nnF6)** mit Bildvergleich, Cluster-Bildern und Erklärungen zu jeder Version.
 
 ## Schnellstart
 
@@ -58,7 +58,7 @@ Aus dem Kurs:
 | `models/` | Trainierte Modelle |
 | `v5_experiments/` | Skripte, Messwerte und Einzelvergleiche zu v5 |
 | `v6_experiments/` | Skripte, Messwerte und Gewichte zu v6, Quellen der Erklärseite |
-| `docs/` | Erklärseite für GitHub Pages |
+| `docs/` | Kopie der Erklärseite als HTML-Datei und Vorschaubild |
 
 ## Quellen
 
