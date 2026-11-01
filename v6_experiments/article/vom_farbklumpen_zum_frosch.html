@@ -7,6 +7,7 @@
   --bg: #eef2f4; --surface: #ffffff; --fg: #15262e; --muted: #51636c; --line: #cdd8dd;
   --accent: #0f6c7c; --accent-soft: #d3e9ed; --warn: #b4441d; --warn-soft: #f8e2d8; --good: #1c7a4d;
   --dot: #b4c2c9; --hit: #d1341b;
+  --s-pixel: #008aa8; --s-struct: #b57a00; --s-vgg: #cb4a20; --s-gan: #8a5cd1; --s-kl: #4470c9;
   --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
@@ -15,11 +16,13 @@
   --bg: #11191d; --surface: #1a252a; --fg: #e6eef1; --muted: #a2b3bb; --line: #33444c;
   --accent: #5cc0d1; --accent-soft: #1b3d45; --warn: #f08a62; --warn-soft: #43261b; --good: #62c795;
   --dot: #4b5d65; --hit: #ff7a5c; color-scheme: dark;
+  --s-pixel: #2fa3bb; --s-struct: #b58410; --s-vgg: #dd6a3e; --s-gan: #a07ae0; --s-kl: #6388de;
 } }
 :root[data-theme="dark"] {
   --bg: #11191d; --surface: #1a252a; --fg: #e6eef1; --muted: #a2b3bb; --line: #33444c;
   --accent: #5cc0d1; --accent-soft: #1b3d45; --warn: #f08a62; --warn-soft: #43261b; --good: #62c795;
   --dot: #4b5d65; --hit: #ff7a5c; color-scheme: dark;
+  --s-pixel: #2fa3bb; --s-struct: #b58410; --s-vgg: #dd6a3e; --s-gan: #a07ae0; --s-kl: #6388de;
 }
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--fg); font: 400 18px/1.55 var(--body); }
@@ -126,6 +129,16 @@ input[type=range] { flex: 1 1 160px; min-width: 0; accent-color: var(--accent); 
 .swatch { width: 28px; height: 28px; border: 1px solid var(--line); display: inline-block; }
 .ssimgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
 .ssimcase { display: grid; gap: 6px; align-content: start; font-size: .9rem; min-width: 0; }
+.step.grade { grid-column: 1 / -1; display: grid; gap: 10px; }
+.step.grade h3 { margin-bottom: 0; }
+.bar-row .track.stack { display: flex; gap: 2px; height: 14px; }
+.seg { display: block; min-width: 2px; border-radius: 2px; }
+.seg.p { background: var(--s-pixel); } .seg.s { background: var(--s-struct); } .seg.v { background: var(--s-vgg); } .seg.g { background: var(--s-gan); } .seg.k { background: var(--s-kl); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .84rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; flex: none; }
+.rank p.note, .answer td.fw { min-width: 0; }
+td.fw { white-space: normal; min-width: 96px; }
 table.feat .featimg { width: 110px; max-width: 26vw; }
 table.feat td { vertical-align: middle; }
 @media (prefers-reduced-motion: no-preference) { button { transition: background-color .15s; } }
@@ -153,7 +166,7 @@ table.feat td { vertical-align: middle; }
   <p>Eine Kursübung: Ein Autoencoder soll Farbbilder mit 32×32 Pixeln lernen, aus zehn Klassen wie Auto, Katze oder Frosch. Das Notebook brach aber schon beim Aufbau mit einer Fehlermeldung ab. Es war zudem sehr knapp eingestellt: drei Rechenstufen, fünf Trainingsdurchgänge und ein Engpass von nur zwei Zahlen.</p>
 
   <h3>Was ein Autoencoder tut</h3>
-  <p>Stell dir vor, du beschreibst jemandem am Telefon ein Bild, und die Person malt es nach. Der Encoder ist die beschreibende Person, der Decoder die malende. Der Engpass ist die Zahl der Wörter, die du verwenden darfst. Trainiert wird, indem das gemalte Bild mit dem Original verglichen wird. Was im Engpass steht, nenne ich auf dieser Seite den Merkzettel.</p>
+  <p>Stell dir vor, du beschreibst jemandem am Telefon ein Bild, und die Person malt es nach. Der Encoder ist die beschreibende Person, der Decoder die malende. Der Engpass ist die Zahl der Wörter, die du verwenden darfst. Trainiert wird, indem das gemalte Bild mit dem Original verglichen wird. Was im Engpass steht, ist die Kodierung des Encoders, auf dieser Seite kurz der Code.</p>
   <div class="flow" aria-label="Schema: Bild geht durch Encoder in den Engpass und durch den Decoder zurück in ein Bild">
     <div><div class="tile" data-strip="original" data-i="7"></div><span class="num">3.072</span>Zahlen im Original</div>
     <svg viewBox="0 0 100 70" role="img" aria-label="Encoder verkleinert"><path d="M2 4 L98 26 L98 44 L2 66 Z"/><text x="50" y="39" text-anchor="middle">Encoder</text></svg>
@@ -161,6 +174,11 @@ table.feat td { vertical-align: middle; }
     <svg viewBox="0 0 100 70" role="img" aria-label="Decoder vergrößert"><path d="M2 26 L98 4 L98 66 L2 44 Z"/><text x="50" y="39" text-anchor="middle">Decoder</text></svg>
     <div><div class="tile" data-strip="v5" data-i="7"></div><span class="num">3.072</span>Zahlen, nachgemalt</div>
   </div>
+
+  <h3>Die Note ist immer eine einzige Zahl</h3>
+  <p>Nach jedem Stapel Bilder bekommt das Modell eine Note, auch Loss genannt. Je kleiner, desto besser. Sind mehrere Prüfer beteiligt, rechnet jeder seine Strafe aus. Die Strafen werden gewichtet addiert, und das Modell senkt nur diese Summe.</p>
+  <p>Das Gewicht entscheidet also, wer sich durchsetzt. Widersprechen sich die Prüfer, entsteht ein Kompromiss. Bei jeder Version zeigt die Karte „So wird benotet“ Formel und Gewichte.</p>
+  <p class="note">Die Balken auf diesen Karten zeigen den Anteil jedes Teils an der Summe, rechts daneben steht die Summe selbst. Start heißt: frisch initialisiertes Modell, Ende heißt: fertig trainiert, jeweils auf den ersten 1.000 Testbildern. Der Anteil ist ein Anhaltspunkt. Wie stark ein Teil die Regler wirklich zieht, hängt auch davon ab, wie steil er sich ändert, und das ist nicht gemessen.</p>
 
   <div class="chart">
     <h3>So eng ist der Engpass: Zahlen pro Bild, maßstabsgetreu</h3>
@@ -173,13 +191,13 @@ table.feat td { vertical-align: middle; }
     <div class="key"><b>Ähnlichkeit (SSIM)</b>Vergleicht Helligkeit, Kontrast und Struktur in kleinen Bildausschnitten. 1,0 heißt identisch. Höher ist besser. <a href="#m-ssim">Verfahren im Anhang</a></div>
     <div class="key"><b>Abweichung (MSE)</b>Wie weit jedes Pixel im Schnitt vom Original entfernt ist, quadriert. Niedriger ist besser. <a href="#m-mse">Verfahren im Anhang</a></div>
     <div class="key"><b>Raster (Nyquist-Leistung)</b>Wie stark Pixel im feinsten Schachbrett-Takt hell und dunkel wechseln. Das Original liegt bei 0,056. Weit darüber heißt: künstliches Muster. <a href="#m-nyquist">Verfahren im Anhang</a></div>
-    <div class="key"><b>Klassen-Treffer (k-NN)</b>Ein einfaches Verfahren schaut, welche Bilder im Merkzettel am nächsten liegen, und rät daraus die Klasse. Blindes Raten träfe 10 %. <a href="#m-knn">Verfahren im Anhang</a></div>
+    <div class="key"><b>Klassen-Treffer (k-NN)</b>Ein einfaches Verfahren schaut, welche Bilder im Code am nächsten liegen, und rät daraus die Klasse. Blindes Raten träfe 10 %. <a href="#m-knn">Verfahren im Anhang</a></div>
     <div class="key"><b>Natürlichkeit (KID)</b>Ein fertiges Bilderkennungsnetz vergleicht, wie sich die Nachbilder als Gruppe von echten Fotos unterscheiden. 0 heißt: nicht unterscheidbar. Niedriger ist besser. <a href="#m-kid">Verfahren im Anhang</a></div>
   </div>
 
   <h3>So liest du die Cluster-Bilder</h3>
   <p>Jeder Punkt ist ein Bild. Liegen zwei Punkte nah beieinander, hält das Modell die Bilder für ähnlich. Wähle eines der zehn Beispielbilder. Es bekommt einen gelben Rand, und alle Bilder seiner Klasse werden rot. Bilden die roten Punkte eine klare Insel, kann das Modell diese Klasse gut auseinanderhalten. Sind sie überall verstreut, nicht. Die Auswahl gilt für alle Versionen auf dieser Seite. Grau sind alle übrigen der 2.000 Testbilder im Cluster, auch solche aus Klassen, die unter den zehn Beispielbildern nicht vorkommen.</p>
-  <p class="note">Ab v3 hat der Merkzettel mehr als zwei Zahlen. Damit er auf den Bildschirm passt, drückt das Verfahren t-SNE ihn auf zwei Achsen. Es zeigt Nachbarschaften, die Abstände zwischen weit entfernten Gruppen sind nicht aussagekräftig.</p>
+  <p class="note">Ab v3 hat der Code mehr als zwei Zahlen. Damit er auf den Bildschirm passt, drückt das Verfahren t-SNE ihn auf zwei Achsen. Es zeigt Nachbarschaften, die Abstände zwischen weit entfernten Gruppen sind nicht aussagekräftig.</p>
 </section>
 
 <section class="version" data-v="v1">
@@ -188,6 +206,13 @@ table.feat td { vertical-align: middle; }
     <div class="step you"><h3>Der Anlass</h3>Das Übungsnotebook brach beim Aufbau mit einer Fehlermeldung ab.</div>
     <div class="step"><h3>Meine Änderung</h3>Eine Zeile: <code>np.prod(...)</code> gab einen Zahlentyp zurück, den Keras ablehnte. Mit <code>int(...)</code> läuft es. Sonst bleibt alles wie in der Übung.</div>
     <div class="step"><h3>Was passiert ist</h3>Das Modell läuft, malt aber fast immer dasselbe: helle oder dunkle Verläufe. Mit 2 Zahlen kann es nicht mehr beschreiben.</div>
+    <div class="step grade"><h3>So wird benotet</h3>
+      <p class="formula">Note = BCE</p>
+      <ul><li><b>BCE (Binary Cross-Entropy):</b> Vergleicht jedes Pixel in jedem Farbkanal mit dem Original, davon der Durchschnitt.</li></ul>
+      <p><b>Gewichtung:</b> Es gibt nur diesen einen Prüfer, also nichts abzuwägen. Die Note sinkt nur von 0,693 auf 0,634. Null ist hier nicht erreichbar, weil BCE bei Grautönen auch für ein perfektes Nachbild über null bleibt.</p>
+      <div class="squeeze"><div class="bar-row"><span class="name">Start</span><span class="track stack" role="img" aria-label="BCE 100 %"><span class="seg p" style="flex:100 1 0" title="BCE: 100 %"></span></span><span class="val">0,693</span></div><div class="bar-row"><span class="name">Ende</span><span class="track stack" role="img" aria-label="BCE 100 %"><span class="seg p" style="flex:100 1 0" title="BCE: 100 %"></span></span><span class="val">0,634</span></div></div><div class="legend"><span><i class="seg p"></i>BCE 100 %</span></div>
+      <p><b>Anders als vorher:</b> Nichts. Die Note stammt unverändert aus der Übung.</p>
+    </div>
   </div>
 </section>
 
@@ -195,8 +220,15 @@ table.feat td { vertical-align: middle; }
   <div class="head"><span class="tag">v2</span><h2>Umbau zum VAE</h2></div>
   <div class="steps">
     <div class="step you"><h3>Der nächste Schritt</h3>Die Übung zum Variational Autoencoder (VAE) aus dem Kurs auf CIFAR-10 übertragen.</div>
-    <div class="step"><h3>Meine Änderung</h3>Der Encoder nennt statt eines festen Punkts eine kleine Wolke, aus der gezogen wird. Das macht den Merkzettel-Raum glatt, sodass man daraus neue Bilder erzeugen kann.</div>
+    <div class="step"><h3>Meine Änderung</h3>Der Encoder nennt statt eines festen Punkts eine kleine Wolke, aus der gezogen wird. Das macht den Code-Raum glatt, sodass man daraus neue Bilder erzeugen kann.</div>
     <div class="step"><h3>Was passiert ist</h3>Kaum Unterschied und sogar minimal schlechter. Der VAE löst eine andere Aufgabe, nämlich das Erzeugen. Der Engpass blieb bei 2 Zahlen, und genau der war das Problem.</div>
+    <div class="step grade"><h3>So wird benotet</h3>
+      <p class="formula">Note = 500 × BCE + KL</p>
+      <ul><li><b>BCE:</b> Der Pixelvergleich aus v1.</li><li><b>KL (Kullback-Leibler):</b> Straft ab, wenn die Wolken des Encoders von einer einheitlichen Glockenkurve abweichen. Das hält den Code-Raum glatt.</li></ul>
+      <p><b>Gewichtung:</b> Die 500 ist fest und ändert sich im Training nicht. Damit macht der Pixelvergleich rund 99 % der Summe aus, die KL-Strafe zählt kaum. Das passt dazu, dass sich die Bilder gegenüber v1 kaum ändern.</p>
+      <div class="squeeze"><div class="bar-row"><span class="name">Durchgang 1</span><span class="track stack" role="img" aria-label="500 × BCE 99,3 %, KL 0,7 %"><span class="seg p" style="flex:99.3 1 0" title="500 × BCE: 99,3 %"></span><span class="seg k" style="flex:0.7 1 0" title="KL: 0,7 %"></span></span><span class="val">334,3</span></div><div class="bar-row"><span class="name">Durchgang 5</span><span class="track stack" role="img" aria-label="500 × BCE 99,0 %, KL 1,0 %"><span class="seg p" style="flex:99.0 1 0" title="500 × BCE: 99,0 %"></span><span class="seg k" style="flex:1.0 1 0" title="KL: 1,0 %"></span></span><span class="val">321,7</span></div></div><div class="legend"><span><i class="seg p"></i>500 × BCE 99,3 → 99,0 %</span><span><i class="seg k"></i>KL 0,7 → 1,0 %</span></div><p class="note">Werte aus dem Trainingslog, Durchschnitt je Durchgang.</p>
+      <p><b>Anders als vorher:</b> Die KL-Strafe ist neu, und BCE zählt 500-fach, um gegen sie aufzuwiegen. Die Lernrate ist mit 0,0005 halb so groß wie in v1.</p>
+    </div>
   </div>
 </section>
 
@@ -206,6 +238,13 @@ table.feat td { vertical-align: middle; }
     <div class="step you"><h3>Deine Überlegung</h3>Im Cluster-Bild ist nur ein riesiger Klumpen zu sehen. Was lässt sich tun, um die Klassifizierung zu verbessern?</div>
     <div class="step"><h3>Meine Änderung</h3>Engpass von 2 auf 32 Zahlen, eine Rechenstufe mehr, 25 statt 5 Durchgänge, MSE als Prüfer. Dazu t-SNE und die k-NN-Messung, damit wir eine Zahl statt nur eines Eindrucks haben.</div>
     <div class="step"><h3>Was passiert ist</h3>Der größte Sprung der ganzen Reise: Erstmals sind Motive erkennbar. Auch der Klassen-Treffer macht einen klaren Sprung. Aber die Bilder sind sehr weich.</div>
+    <div class="step grade"><h3>So wird benotet</h3>
+      <p class="formula">Note = MSE</p>
+      <ul><li><b>MSE:</b> Durchschnitt der quadrierten Pixelabstände. Große Fehler kosten besonders viel.</li></ul>
+      <p><b>Gewichtung:</b> MSE entscheidet allein. Kein Prüfer achtet auf Kanten oder Struktur. Wer unsicher ist, fährt mit dem Mittelwert am besten, deshalb malt das Modell vorsichtiges Grau.</p>
+      <div class="squeeze"><div class="bar-row"><span class="name">Start</span><span class="track stack" role="img" aria-label="MSE 100 %"><span class="seg p" style="flex:100 1 0" title="MSE: 100 %"></span></span><span class="val">0,0636</span></div><div class="bar-row"><span class="name">Ende</span><span class="track stack" role="img" aria-label="MSE 100 %"><span class="seg p" style="flex:100 1 0" title="MSE: 100 %"></span></span><span class="val">0,0112</span></div></div><div class="legend"><span><i class="seg p"></i>MSE 100 %</span></div>
+      <p><b>Anders als vorher:</b> BCE wurde durch MSE ersetzt. Gleichzeitig änderten sich Engpass, Tiefe und Dauer, die Wirkung der neuen Note allein ist also nicht messbar.</p>
+    </div>
   </div>
   <div class="demo">
     <h3>Warum der MSE-Prüfer weich malt</h3>
@@ -224,6 +263,13 @@ table.feat td { vertical-align: middle; }
     <div class="step you"><h3>Deine Überlegung</h3>Die Bilder sind weiter deutlich unscharf. Nach dem Lauf dann: Sie sind näher am Original, haben aber starke Fraktale und wirken immer noch unscharf.</div>
     <div class="step"><h3>Meine Änderung</h3>Gleiches Modell und gleicher Engpass wie v3, also 32 Zahlen. Neu ist nur der Prüfer: Zusätzlich vergleicht ein fertig trainiertes Bilderkennungsnetz (VGG16) Formen und Texturen.</div>
     <div class="step"><h3>Was passiert ist</h3>Das Raster ist rund 106-mal so stark wie im Original, Abweichung und SSIM sind schlechter als in v3. Die neu gemessene Bildschärfe wirkte fast wie im Original, zeigte aber vor allem das Raster. Überraschend: Der Klassen-Treffer steigt auf 41,9 %, den besten Wert aller Versionen.</div>
+    <div class="step grade"><h3>So wird benotet</h3>
+      <p class="formula">Note = MSE + 0,00001 × VGG</p>
+      <ul><li><b>MSE:</b> Der Pixelvergleich aus v3.</li><li><b>VGG:</b> Vergleicht Original und Nachbild an drei Stellen eines fertigen Bilderkennungsnetzes, ohne Normierung, Eingabe 32×32 Pixel. Die drei Stellen zählen laut Formel gleich. Weil ihre Rohwerte verschieden groß sind, stellt die hinterste rund 54 % und die vorderste nur rund 5 % des VGG-Werts.</li></ul>
+      <p><b>Gewichtung:</b> VGG dominiert. Das Gewicht sieht winzig aus, die Rohwerte liegen aber um 140.000 bis 340.000. Im Notebook zählte VGG am untrainierten Modell 55-mal so viel wie der Pixelvergleich, am fertigen Modell sogar 78-mal. Der Pixelvergleich hat also kaum eine Stimme. Das passt zu Raster und höherer Abweichung.</p>
+      <div class="squeeze"><div class="bar-row"><span class="name">Start</span><span class="track stack" role="img" aria-label="MSE 1,9 %, 0,00001 × VGG 98,1 %"><span class="seg p" style="flex:1.9 1 0" title="MSE: 1,9 %"></span><span class="seg v" style="flex:98.1 1 0" title="0,00001 × VGG: 98,1 %"></span></span><span class="val">3,27</span></div><div class="bar-row"><span class="name">Ende</span><span class="track stack" role="img" aria-label="MSE 1,3 %, 0,00001 × VGG 98,7 %"><span class="seg p" style="flex:1.3 1 0" title="MSE: 1,3 %"></span><span class="seg v" style="flex:98.7 1 0" title="0,00001 × VGG: 98,7 %"></span></span><span class="val">1,43</span></div></div><div class="legend"><span><i class="seg p"></i>MSE 1,9 → 1,3 %</span><span><i class="seg v"></i>0,00001 × VGG 98,1 → 98,7 %</span></div><p class="note">Die 55 stammen aus dem Notebook (erste 100 Trainingsbilder). Auf den 1.000 Testbildern der Balken sind es am Start 50.</p>
+      <p><b>Anders als vorher:</b> VGG kam dazu, MSE blieb. Der Nachlauf R0 nutzte ein 10-mal kleineres Gewicht. Dort war VGG am Ende noch rund 10-mal so groß wie die MSE und das Raster mit 0,90 deutlich kleiner. R0 hat aber auch einen anderen Engpass und weniger Bilder.</p>
+    </div>
   </div>
   <p class="note">Bilder und Zahlen stammen aus dem v4-Lauf mit 25 Durchgängen und allen 50.000 Trainingsbildern. Ein zweiter Lauf mit gleichem Engpass zeigte ein noch stärkeres Raster: 51,2 bei SSIM 0,376 und 37,4 % Klassen-Treffer. Für den Vergleich mit dem neuen Decoder gibt es zusätzlich den Nachlauf R0 mit 256 Zahlen, 10.000 Bildern und kleinerem VGG-Gewicht: Raster 0,90, SSIM 0,663, Klassen-Treffer 26,6 %.</p>
 
@@ -250,13 +296,20 @@ table.feat td { vertical-align: middle; }
   <div class="head"><span class="tag">v5</span><h2>Das Modell selbst umbauen</h2></div>
   <div class="steps">
     <div class="step you"><h3>Deine Überlegung</h3>Immer noch nicht gut: starke Fraktale, weiter unscharf. Was war noch ungelöst, und was lässt sich sonst optimieren?</div>
-    <div class="step"><h3>Meine Änderung</h3>Neuer Decoder ohne Stempel-Effekt, Merkzettel als Karte (siehe unten), feinere Rechenblöcke, neuer Prüfer aus L1 und SSIM, Engpass 512, mehr verschiedene Trainingsbilder (30.000).</div>
+    <div class="step"><h3>Meine Änderung</h3>Neuer Decoder ohne Stempel-Effekt, Code als Karte (siehe unten), feinere Rechenblöcke, neuer Prüfer aus L1 und SSIM, Engpass 512, mehr verschiedene Trainingsbilder (30.000).</div>
     <div class="step"><h3>Was passiert ist</h3>Fraktale verschwunden. Bei den 10 Beispielbildern sind Schiff, Auto und Frosch klar zu erkennen, sogar die rote Schrift. Beim Sortieren nach Klassen wurde es schlechter als in v3.</div>
+    <div class="step grade"><h3>So wird benotet</h3>
+      <p class="formula">Note = L1 + 0,2 × (1 − SSIM)</p>
+      <ul><li><b>L1:</b> Durchschnitt der Pixelabstände ohne Quadrieren.</li><li><b>SSIM:</b> Vergleicht Helligkeit, Kontrast und Struktur in Fenstern von 7×7 Pixeln, mit Gauß-Gewicht auf der Fenstermitte. <code>1 − SSIM</code> macht daraus eine Strafe.</li></ul>
+      <p><b>Gewichtung:</b> Beide Teile sind ein echter Kompromiss. L1 stellt rund 60 % der Summe, SSIM rund 40 %, und das bleibt im Training fast gleich. Kein Teil braucht ein Zusatznetz, beide rechnen direkt auf den Pixeln. Andere Gewichte als 0,2 wurden nicht getestet.</p>
+      <div class="squeeze"><div class="bar-row"><span class="name">Start</span><span class="track stack" role="img" aria-label="L1 58,4 %, 0,2 × (1 − SSIM) 41,6 %"><span class="seg p" style="flex:58.4 1 0" title="L1: 58,4 %"></span><span class="seg s" style="flex:41.6 1 0" title="0,2 × (1 − SSIM): 41,6 %"></span></span><span class="val">0,450</span></div><div class="bar-row"><span class="name">Ende</span><span class="track stack" role="img" aria-label="L1 60,5 %, 0,2 × (1 − SSIM) 39,5 %"><span class="seg p" style="flex:60.5 1 0" title="L1: 60,5 %"></span><span class="seg s" style="flex:39.5 1 0" title="0,2 × (1 − SSIM): 39,5 %"></span></span><span class="val">0,053</span></div></div><div class="legend"><span><i class="seg p"></i>L1 58 → 60 %</span><span><i class="seg s"></i>0,2 × (1 − SSIM) 42 → 40 %</span></div>
+      <p><b>Anders als vorher:</b> MSE und VGG sind raus, L1 und SSIM sind neu.</p>
+    </div>
   </div>
 
   <div class="demo">
     <h3>Der wichtigste Umbau: Karte statt Zusammenfassung</h3>
-    <p>Bisher quetschte das Modell das Bild erst auf ein Raster von 2×2 Feldern und dann in eine lange Liste. Jede Information über den Ort musste diesen Umweg überleben. Jetzt bleibt der Merkzettel eine grobe Karte mit 8×8 Feldern. In jedem Feld stehen ein paar Zahlen darüber, was genau dort im Bild ist. Die Gesamtzahl kann dabei gleich bleiben: 8×8×4 sind 256 Zahlen, wie beim Nachlauf R0.</p>
+    <p>Bisher quetschte das Modell das Bild erst auf ein Raster von 2×2 Feldern und dann in eine lange Liste. Jede Information über den Ort musste diesen Umweg überleben. Jetzt bleibt der Code eine grobe Karte mit 8×8 Feldern. In jedem Feld stehen ein paar Zahlen darüber, was genau dort im Bild ist. Die Gesamtzahl kann dabei gleich bleiben: 8×8×4 sind 256 Zahlen, wie beim Nachlauf R0.</p>
     <div class="grids">
       <div><div class="gridbox" id="g2"></div><b>Alt: 2×2 Felder</b>Viel Inhalt, kaum Ort</div>
       <div><div class="gridbox" id="g8"></div><b>Neu: 8×8 Felder</b>Weniger Inhalt pro Feld, aber mit Ort</div>
@@ -278,8 +331,15 @@ table.feat td { vertical-align: middle; }
   <div class="head"><span class="tag">v6</span><h2>Länger trainieren und breiter bauen</h2></div>
   <div class="steps">
     <div class="step you"><h3>Die offene Frage</h3>v5 hatte nur 1.500 Schritte auf der CPU. Lag der Rückstand auf die PCA am Modell oder nur an der kurzen Zeit?</div>
-    <div class="step"><h3>Meine Änderung</h3>Erst nur länger: 11.250 statt 1.500 Schritte, alle 45.000 Bilder, auf der GPU. Das allein schlägt die PCA schon (MSE 0,00091). Danach das Modell doppelt so breit, mit rund 4-mal so vielen Reglern.</div>
+    <div class="step"><h3>Meine Änderung</h3>Erst nur länger: 11.250 statt 1.500 Schritte, alle 45.000 Bilder, auf der GPU. Das allein schlägt die PCA schon (MSE 0,00091). Danach das Modell doppelt so breit: Jede Rechenstufe hat doppelt so viele Filter. Dadurch hat es rund 4-mal so viele Regler.</div>
     <div class="step"><h3>Was passiert ist</h3>Abweichung 0,00077 und SSIM 0,963, beides besser als PCA 512. Keine Fraktale. Feine Texturen bleiben weich, und der Klassen-Treffer liegt mit 22,8 % auf dem Niveau von v5.</div>
+    <div class="step grade"><h3>So wird benotet</h3>
+      <p class="formula">Note = L1 + 0,2 × (1 − SSIM)</p>
+      <ul><li><b>L1 und SSIM:</b> Gleich gerechnet wie in v5.</li></ul>
+      <p><b>Gewichtung:</b> Der Kompromiss bleibt. Im längeren Training fällt der SSIM-Teil stärker als der L1-Teil, am Ende stellt L1 rund 70 %. Die Summe sinkt von 0,053 in v5 auf 0,027.</p>
+      <div class="squeeze"><div class="bar-row"><span class="name">Start</span><span class="track stack" role="img" aria-label="L1 58,0 %, 0,2 × (1 − SSIM) 42,0 %"><span class="seg p" style="flex:58.0 1 0" title="L1: 58,0 %"></span><span class="seg s" style="flex:42.0 1 0" title="0,2 × (1 − SSIM): 42,0 %"></span></span><span class="val">0,430</span></div><div class="bar-row"><span class="name">Ende</span><span class="track stack" role="img" aria-label="L1 69,8 %, 0,2 × (1 − SSIM) 30,2 %"><span class="seg p" style="flex:69.8 1 0" title="L1: 69,8 %"></span><span class="seg s" style="flex:30.2 1 0" title="0,2 × (1 − SSIM): 30,2 %"></span></span><span class="val">0,027</span></div></div><div class="legend"><span><i class="seg p"></i>L1 58 → 70 %</span><span><i class="seg s"></i>0,2 × (1 − SSIM) 42 → 30 %</span></div>
+      <p><b>Anders als vorher:</b> Nichts. Geändert wurden nur Schritte, Bilder und Breite. Darum sind diese Läufe saubere Vergleiche bei gleicher Note.</p>
+    </div>
   </div>
 </section>
 
@@ -287,13 +347,20 @@ table.feat td { vertical-align: middle; }
   <div class="head"><span class="tag">v6</span><h2>Ein Fälschungs-Erkenner als dritter Prüfer</h2></div>
   <div class="steps">
     <div class="step you"><h3>Die offene Frage</h3>Wie viel Natürlichkeit bringt ein Prüfer, der echte Bilder von nachgemalten unterscheiden soll, und was kostet das an Genauigkeit?</div>
-    <div class="step"><h3>Meine Änderung</h3>Ein kleines zweites Netz (PatchGAN) bewertet Bildausschnitte, der Autoencoder lernt, es zu täuschen. Der erste Versuch mit Gewicht 0,1 kippte: Die Prüfnote stieg von 0,032 auf bis zu 0,31. Mit Gewicht 0,01 blieb das Training stabil.</div>
+    <div class="step"><h3>Meine Änderung</h3>Ein kleines zweites Netz (PatchGAN) bewertet Bildausschnitte, der Autoencoder lernt, es zu täuschen. Der erste Versuch mit Gewicht 0,1 kippte: Der Teil aus L1 und SSIM stieg auf den Prüfbildern von 0,032 auf bis zu 0,31. Mit Gewicht 0,01 blieb das Training stabil.</div>
     <div class="step"><h3>Was passiert ist</h3>Die Natürlichkeit verbessert sich klar (KID 0,0125 statt 0,0216), die Abweichung steigt nur leicht auf 0,00089. Das Raster kommt mit 0,051 nahe ans Original. Beim Hinschauen ist der Unterschied bei diesen kleinen Bildern gering.</div>
+    <div class="step grade"><h3>So wird benotet</h3>
+      <p class="formula">Note des Autoencoders = L1 + 0,2 × (1 − SSIM) + 0,01 × GAN<br>GAN = −Durchschnitt von E(gemalt)<br>Note des Erkenners = Durchschnitt von max(0, 1 − E(echt)) + Durchschnitt von max(0, 1 + E(gemalt))</p>
+      <ul><li><b>L1 und SSIM:</b> Gleich gerechnet wie in v5.</li><li><b>GAN:</b> Je echter der Erkenner E ein Nachbild bewertet, desto kleiner wird dieser Teil.</li><li><b>Der Fälschungs-Erkenner:</b> Er ist ein eigenes Netz mit eigener Note und eigenem Optimierer (Adam, feste Lernrate 0,0002). Er lernt, Originale über +1 und Nachbilder unter −1 zu bewerten. Pro Bild gibt er 8×8 Noten ab, jede für einen überlappenden Ausschnitt von rechnerisch bis zu 30×30 Pixeln.</li><li><b>So läuft das Training:</b> In den ersten 3.375 von 11.250 Schritten ist der GAN-Teil abgeschaltet und der Erkenner lernt nicht. Danach lernen beide Netze im selben Schritt je einmal aus demselben Bildstapel. Nach dem Training wird der Erkenner nicht mehr gebraucht.</li></ul>
+      <p><b>Gewichtung:</b> Das Gewicht ist 0,01, weil 0,1 kippte: Nach dem Zuschalten stieg der Teil aus L1 und SSIM auf den Prüfbildern von 0,032 auf 0,31, der Lauf wurde abgebrochen. Mit 0,01 stieg er nur kurz von 0,031 auf 0,039 und fiel dann auf 0,029. Am Ende stellt der GAN-Teil rund 10 % der Summe. Der Kompromiss hat einen Preis: 16 % mehr Abweichung für 42 % bessere Natürlichkeit. Zwischenwerte wurden nicht getestet.</p>
+      <div class="squeeze"><div class="bar-row"><span class="name">Vor dem GAN</span><span class="track stack" role="img" aria-label="L1 69,5 %, 0,2 × (1 − SSIM) 30,5 %"><span class="seg p" style="flex:69.5 1 0" title="L1: 69,5 %"></span><span class="seg s" style="flex:30.5 1 0" title="0,2 × (1 − SSIM): 30,5 %"></span></span><span class="val">0,031</span></div><div class="bar-row"><span class="name">Ende</span><span class="track stack" role="img" aria-label="L1 62,5 %, 0,2 × (1 − SSIM) 27,8 %, 0,01 × GAN 9,7 %"><span class="seg p" style="flex:62.5 1 0" title="L1: 62,5 %"></span><span class="seg s" style="flex:27.8 1 0" title="0,2 × (1 − SSIM): 27,8 %"></span><span class="seg g" style="flex:9.7 1 0" title="0,01 × GAN: 9,7 %"></span></span><span class="val">0,032</span></div></div><div class="legend"><span><i class="seg p"></i>L1 70 → 63 %</span><span><i class="seg s"></i>0,2 × (1 − SSIM) 30 → 28 %</span><span><i class="seg g"></i>0,01 × GAN 0 → 10 %</span></div><p class="note">Vor dem GAN: Durchgang 7. Ende: GAN-Anteil aus dem Trainingslog, Aufteilung von L1 und SSIM auf 1.000 Testbildern. Der Erkenner wurde nicht gespeichert, deshalb lässt sich der GAN-Teil nicht auf Testbildern nachrechnen.</p>
+      <p><b>Anders als vorher:</b> Nur der GAN-Teil und der Erkenner sind neu. L1 und SSIM zählen wie im Treue-Modell.</p>
+    </div>
   </div>
   <div class="demo">
-    <h3>Vier Prüfer im Vergleich</h3>
+    <h3>Vier Noten im Vergleich</h3>
     <div class="tablewrap"><table id="prueferTable"></table></div>
-    <p class="note">Testset mit 10.000 Bildern, je 11.250 Schritte auf dem breiten Modell. Mit VGG lief das Netz auf 48×48 statt 64×64 Pixeln, weil der Grafikspeicher sonst nicht reichte. Der Lauf mit VGG und GAN ist fast gleichauf, sein Raster liegt aber über dem Original. Diese Grenze stand vor den Läufen fest, deshalb zählt der Lauf nur mit GAN als Natürlichkeits-Modell.</p>
+    <p class="note">Testset mit 10.000 Bildern, je 11.250 Schritte auf dem breiten Modell. „+ VGG“ heißt hier: + 0,1 × normierter VGG-Vergleich + 0,01 × Glättungsstrafe. Das VGG-Netz lief auf 48×48 statt 64×64 Pixeln, weil der Grafikspeicher sonst nicht reichte. Der VGG-Teil fällt in B2 von 23 % der Summe am Start auf 10 % am Ende, die Glättungsstrafe stellt am Ende 3 %. Der Lauf mit VGG und GAN ist fast gleichauf, sein Raster liegt aber über dem Original. Diese Grenze stand vor den Läufen fest, deshalb zählt der Lauf nur mit GAN als Natürlichkeits-Modell.</p>
   </div>
   <div class="demo">
     <h3>Schärfer als das Original?</h3>
@@ -323,9 +390,9 @@ table.feat td { vertical-align: middle; }
   <p class="note">Rot sind alle Bilder derselben Klasse, der gelbe Rand zeigt das gewählte Bild. Grau sind alle übrigen Testbilder.</p>
   <div class="multi" id="multi"></div>
   <div class="chart">
-    <h3>Klassen-Treffer (k-NN) auf Basis des Merkzettels</h3>
+    <h3>Klassen-Treffer (k-NN) auf Basis des Codes</h3>
     <div class="squeeze" id="knn"></div>
-    <p class="note">Gleiche Messung auf 5.000 Testbildern, davon 4.000 als Vergleichsbilder. Wichtig: Diese Zahl sagt nichts darüber, wie gut ein Bild nachgemalt wird. Darin liegt v5 klar vorne. Warum v4 hier trotzdem gewinnt, steht direkt unten in der <a href="#warum-v4">Zusammenfassung</a>.</p>
+    <p class="note">Gleiche Messung auf 5.000 Testbildern, davon 4.000 als Vergleichsbilder. Wichtig: Diese Zahl sagt nichts darüber, wie gut ein Bild nachgemalt wird. Darin liegen v5 und v6 klar vorne. Warum v4 hier trotzdem gewinnt, steht direkt unten in der <a href="#warum-v4">Zusammenfassung</a>.</p>
   </div>
 </section>
 
@@ -333,19 +400,20 @@ table.feat td { vertical-align: middle; }
   <div class="eyebrow">Zusammenfassung</div>
   <h2>Was am meisten gebracht hat</h2>
   <div class="answer" id="warum-v4">
-    <h3>Warum hat v4 die höhere Prozentzahl, obwohl v5 besser ist?</h3>
-    <p>Die beiden messen Verschiedenes. <b>Besser</b> heißt auf dieser Seite: Das Bild wird genauer nachgemalt. Die Prozentzahl ist der Klassen-Treffer und sagt nur, wie gut ähnliche Merkzettel zur selben Klasse gehören. Das Bild selbst geht darin nicht ein. v5 malt also deutlich besser, v4 sortiert besser.</p>
+    <h3>Warum hat v4 die höhere Prozentzahl, obwohl v5 und v6 besser sind?</h3>
+    <p>Die beiden messen Verschiedenes. <b>Besser</b> heißt auf dieser Seite: Das Bild wird genauer nachgemalt. Die Prozentzahl ist der Klassen-Treffer und sagt nur, wie gut ähnliche Codes zur selben Klasse gehören. Das Bild selbst geht darin nicht ein. v5 und v6 malen also deutlich besser, v4 sortiert besser.</p>
     <div class="tablewrap"><table>
-      <thead><tr><th>Messung</th><th>v4</th><th>v5</th><th>Besser</th></tr></thead>
+      <thead><tr><th>Messung</th><th>v4</th><th>v5</th><th>v6</th><th>v6 GAN</th><th>Am besten</th></tr></thead>
       <tbody>
-        <tr><td>Ähnlichkeit (SSIM, höher ist besser)</td><td>0,423</td><td>0,903</td><td>v5</td></tr>
-        <tr><td>Abweichung (MSE, niedriger ist besser)</td><td>0,0182</td><td>0,0022</td><td>v5</td></tr>
-        <tr><td>Raster (Nyquist-Leistung, Original 0,056, darüber ist Muster)</td><td>5,949</td><td>0,007</td><td>v5</td></tr>
-        <tr><td>Klassen-Treffer (k-NN, höher ist besser)</td><td>41,9 %</td><td>23,7 %</td><td>v4</td></tr>
+        <tr><td>Note (Loss)</td><td class="fw">MSE + 0,00001 × VGG</td><td class="fw">L1 + 0,2 × (1 − SSIM)</td><td class="fw">L1 + 0,2 × (1 − SSIM)</td><td class="fw">L1 + 0,2 × (1 − SSIM) + 0,01 × GAN</td><td></td></tr>
+        <tr><td>Ähnlichkeit (SSIM, höher ist besser)</td><td>0,423</td><td>0,903</td><td>0,963</td><td>0,958</td><td>v6</td></tr>
+        <tr><td>Abweichung (MSE, niedriger ist besser)</td><td>0,0182</td><td>0,0022</td><td>0,00077</td><td>0,00089</td><td>v6</td></tr>
+        <tr><td>Raster (Nyquist-Leistung, Original 0,056, darüber ist Muster)</td><td>5,949</td><td>0,007</td><td>0,017</td><td>0,051</td><td>v6 GAN (am nächsten am Original)</td></tr>
+        <tr><td>Klassen-Treffer (k-NN, höher ist besser)</td><td>41,9 %</td><td>23,7 %</td><td>22,8 %</td><td>19,8 %</td><td>v4</td></tr>
       </tbody>
     </table></div>
-    <p><b>Darum gilt v5 als besser:</b> Trainiert wurde jede Version nur aufs Nachmalen. Das Sortieren hat keine Version gelernt, es ist bei allen ein Nebeneffekt.</p>
-    <p><b>Darum ist der Nebeneffekt bei v4 größer:</b> Der Merkzettel von v5 beschreibt genau, welche Farbe <i>wo</i> im Bild liegt. Ein rotes und ein weißes Auto bekommen dadurch sehr verschiedene Merkzettel, ein rotes Auto und ein roter Apfel eher ähnliche. v5 sortiert deshalb kaum anders als die rohen Pixel (23,7 % gegen 26,9 %). Bei v4 rechnet der Prüfer mit einem Bilderkennungsnetz, dadurch landet im Merkzettel eher, <i>was</i> im Bild ist. Diese Erklärung ist plausibel, aber nicht einzeln gemessen.</p>
+    <p><b>Darum gelten v5 und v6 als besser:</b> Trainiert wurde jede Version nur aufs Nachmalen. Das Sortieren hat keine Version gelernt, es ist bei allen ein Nebeneffekt.</p>
+    <p><b>Darum ist der Nebeneffekt bei v4 größer:</b> Der Code von v5 und v6 beschreibt genau, welche Farbe <i>wo</i> im Bild liegt. Ein rotes und ein weißes Auto bekommen dadurch sehr verschiedene Codes, ein rotes Auto und ein roter Apfel eher ähnliche. v5 und v6 sortieren deshalb kaum anders als die rohen Pixel (23,7 % und 22,8 % gegen 26,9 %). Der Fälschungs-Erkenner in v6 GAN drückt den Wert noch etwas (19,8 %). Vermutlich, weil er nur auf Natürlichkeit achtet, nicht auf die Klasse. Auch das ist nicht einzeln gemessen. Bei v4 rechnet der Prüfer mit einem Bilderkennungsnetz, dadurch landet im Code eher, <i>was</i> im Bild ist. Diese Erklärung ist plausibel, aber nicht einzeln gemessen.</p>
     <p><b>Folge:</b> Wer gute Bilder und gutes Sortieren will, muss dem Modell die Klassen im Training zeigen (siehe nächste Schritte).</p>
   </div>
   <div class="chart">
@@ -359,24 +427,30 @@ table.feat td { vertical-align: middle; }
 
   <div class="rank">
     <div><span class="n">1</span><h3>Mehr Zahlen im Engpass: von 2 auf 32 (v1 zu v3)</h3>
-      <p>SSIM von 0,17 auf 0,51, Abweichung 69 % kleiner. Erst dadurch entsteht ein erkennbares Bild. Das ist die Telefon-Regel: Mit zwei Wörtern lässt sich kein Bild beschreiben, egal wie gut die Person zuhört. In diesem Schritt änderten sich auch Tiefe, Prüfer und Trainingsdauer, der Anteil des Engpasses allein ist also nicht sauber getrennt.</p></div>
+      <p>SSIM von 0,17 auf 0,51, Abweichung 69 % kleiner. Erst dadurch entsteht ein erkennbares Bild. Das ist die Telefon-Regel: Mit zwei Wörtern lässt sich kein Bild beschreiben, egal wie gut die Person zuhört. In diesem Schritt änderten sich auch Tiefe, Prüfer und Trainingsdauer, der Anteil des Engpasses allein ist also nicht sauber getrennt.</p>
+      <p class="note"><b>Note: BCE → MSE.</b> Hier änderte sich also auch die Note, der Effekt ist deshalb nicht sauber getrennt.</p></div>
     <div><span class="n">2</span><h3>Neue Architektur: Decoder und Karte (A1 zu R1)</h3>
-      <p>Der größte sauber gemessene Einzelhebel und die Lösung deines Fraktal-Problems. Bei gleichem Prüfer, gleichen 256 Zahlen, gleichen Bildern und gleicher Schrittzahl: Abweichung 62 % kleiner, SSIM +0,135, Raster auf ein Zehntel. Vermutlich wichtig: Das Modell musste nicht länger den Ort durch einen 2×2-Engpass retten. Welcher Teil des Umbaus wie viel beitrug, habe ich nicht einzeln gemessen.</p></div>
+      <p>Der größte sauber gemessene Einzelhebel und die Lösung deines Fraktal-Problems. Bei gleichem Prüfer, gleichen 256 Zahlen, gleichen Bildern und gleicher Schrittzahl: Abweichung 62 % kleiner, SSIM +0,135, Raster auf ein Zehntel. Vermutlich wichtig: Das Modell musste nicht länger den Ort durch einen 2×2-Engpass retten. Welcher Teil des Umbaus wie viel beitrug, habe ich nicht einzeln gemessen.</p>
+      <p class="note"><b>Note unverändert: L1 + 0,2 × (1 − SSIM).</b> Das macht diesen Vergleich sauber.</p></div>
     <div><span class="n">3</span><h3>Der neue Prüfer L1 + SSIM (A2 zu A1)</h3>
-      <p>Auf dem alten Decoder: SSIM +0,10, Raster halbiert, Abweichung 8 % kleiner. Hilfreich und billig, aber er allein hätte die Fraktale nicht beseitigt.</p></div>
+      <p>Auf dem alten Decoder: SSIM +0,10, Raster halbiert, Abweichung 8 % kleiner. Hilfreich und billig, aber er allein hätte die Fraktale nicht beseitigt.</p>
+      <p class="note"><b>Note: MSE → L1 + 0,2 × (1 − SSIM).</b> In A1 tragen beide Teile am Ende fast gleich viel bei (53 % und 47 %). Dieser Kompromiss passt dazu, dass SSIM stark steigt und die Abweichung nur leicht sinkt.</p></div>
     <div><span class="n">4</span><h3>Noch mehr Zahlen: von 256 auf 512 (R1 zu v5)</h3>
-      <p>SSIM +0,036, Abweichung rund 27 % kleiner. Sichtbar, zum Beispiel an der Schrift auf Bild 4.</p></div>
+      <p>SSIM +0,036, Abweichung rund 27 % kleiner. Sichtbar, zum Beispiel an der Schrift auf Bild 4.</p>
+      <p class="note"><b>Note unverändert: L1 + 0,2 × (1 − SSIM).</b> Geändert hat sich nur der Engpass.</p></div>
     <div><span class="n">5</span><h3>Länger trainieren: von 1.500 auf 11.250 Schritte (v5 zu B0)</h3>
-      <p>Abweichung 58 % kleiner, SSIM +0,053, bei gleichem Modell und Prüfer. Dafür stieg das Raster von 0,007 auf 0,019, bleibt aber weit unter dem Original.</p></div>
+      <p>Abweichung 58 % kleiner, SSIM +0,053, bei gleichem Modell und Prüfer. Dafür stieg das Raster von 0,007 auf 0,019, bleibt aber weit unter dem Original.</p>
+      <p class="note"><b>Note unverändert: L1 + 0,2 × (1 − SSIM).</b> Geändert haben sich nur Schritte und Bilder (45.000 statt 30.000). Das macht diesen Vergleich sauber.</p></div>
     <div><span class="n">6</span><h3>Der Fälschungs-Erkenner (B1 zu B3)</h3>
-      <p>Der einzige Prüfer, der die Natürlichkeit klar verbessert: KID 42 % niedriger. Das kostet rund 16 % mehr Abweichung.</p></div>
+      <p>Der einzige Prüfer, der die Natürlichkeit klar verbessert: KID 42 % niedriger. Das kostet rund 16 % mehr Abweichung.</p>
+      <p class="note"><b>Note: L1 + 0,2 × (1 − SSIM) → dieselbe Summe + 0,01 × GAN.</b> Der GAN-Teil stellt am Ende rund 10 % der Summe. Das Modell tauscht also ein Stück Genauigkeit gegen Natürlichkeit, und das Gewicht legt den Kurs fest.</p></div>
   </div>
 
   <h3>Was wenig oder nichts brachte</h3>
   <ul>
-    <li><b>VAE (v2):</b> SSIM und Abweichung praktisch unverändert. Er ist für eine andere Aufgabe gebaut.</li>
-    <li><b>VGG-Prüfer:</b> Für die Bilder ein Rückschritt: v4 hat gegenüber v3 mehr Abweichung, weniger SSIM und rund 140-mal mehr Raster. Nur der Klassen-Treffer steigt. Auf dem neuen Decoder änderte selbst ein voller Lauf (B2) bei Abweichung, SSIM und KID nichts Messbares, nur der VGG-Abstand sank um 9 %.</li>
-    <li><b>Die Kennzahl Laplace-Schärfe aus v4:</b> Sie bewertete v4 besser als v5, obwohl v4 sichtbar schlechter ist. Sie misst Kanten, egal ob echt oder Muster.</li>
+    <li><b>VAE (v2):</b> SSIM und Abweichung praktisch unverändert. Er ist für eine andere Aufgabe gebaut. Note: BCE → 500 × BCE + KL. Die KL-Strafe stellt nur rund 1 % der Summe.</li>
+    <li><b>VGG-Prüfer:</b> Für die Bilder ein Rückschritt: v4 hat gegenüber v3 mehr Abweichung, weniger SSIM und rund 140-mal mehr Raster. Nur der Klassen-Treffer steigt. Auf dem neuen Decoder änderte selbst ein voller Lauf (B2) bei Abweichung, SSIM und KID nichts Messbares, nur der VGG-Abstand sank um 9 %. Note in v3 zu v4: MSE → MSE + 0,00001 × VGG, VGG stellt rund 98 % der Summe und dominiert. Note in B1 zu B2: L1 + 0,2 × (1 − SSIM) → dazu + 0,1 × normierter VGG-Vergleich + 0,01 × Glättungsstrafe, beide zusammen stellen am Ende rund 13 %, zu wenig, um L1 und SSIM zu verdrängen.</li>
+    <li><b>Die Kennzahl Laplace-Schärfe aus v4:</b> Sie bewertete v4 besser als v5, obwohl v4 sichtbar schlechter ist. Sie misst Kanten, egal ob echt oder Muster. Sie war nie Teil der Note, sondern nur eine Messung danach.</li>
   </ul>
 
   <h3>Alle Zahlen im Überblick</h3>
@@ -412,17 +486,23 @@ table.feat td { vertical-align: middle; }
   <p>Diese Runde lief in v5 1.500-mal. Der Loss legt also fest, was als gut gilt. Adam legt fest, wie die Regler verstellt werden. Deshalb verändert ein anderer Loss das Ergebnis so stark: Das Modell lernt genau das, was benotet wird, auch wenn das im Bild schlecht aussieht.</p>
 
   <div class="tablewrap"><table>
-    <thead><tr><th>Version</th><th>Formel der Note</th><th>Was zählt</th></tr></thead>
+    <thead><tr><th>Version, Lauf</th><th>Formel der Note</th><th>Was zählt</th><th>Schritte, Lernrate</th></tr></thead>
     <tbody>
-      <tr><td>v1</td><td><code>BCE</code></td><td class="w">Pixelvergleich, eine weitere Formel namens Binary Cross-Entropy</td></tr>
-      <tr><td>v2</td><td><code>BCE + KL</code></td><td class="w">Pixelvergleich, dazu eine Strafe, die den Merkzettel-Raum glatt hält</td></tr>
-      <tr><td>v3</td><td><code>MSE</code></td><td class="w">Pixelvergleich, quadriert</td></tr>
-      <tr><td>v4</td><td><code>MSE + 0,00001 × VGG</code></td><td class="w">Pixelvergleich und Vergleich im Blick des Bilderkennungsnetzes</td></tr>
-      <tr class="hl"><td>v5, v6 Treue</td><td><code>L1 + 0,2 × (1 − SSIM)</code></td><td class="w">Pixelvergleich und Struktur in kleinen Ausschnitten</td></tr>
-      <tr><td>v6 Natürlichkeit</td><td><code>L1 + 0,2 × (1 − SSIM) + 0,01 × GAN</code></td><td class="w">Dazu die Note des Fälschungs-Erkenners</td></tr>
+      <tr><td>v1</td><td><code>BCE</code></td><td class="w">Pixelvergleich, eine weitere Formel namens Binary Cross-Entropy</td><td>2.500, 0,001</td></tr>
+      <tr><td>v2</td><td><code>500 × BCE + KL</code></td><td class="w">Pixelvergleich, dazu eine Strafe, die den Code-Raum glatt hält. Gewicht fest</td><td>2.500, 0,0005</td></tr>
+      <tr><td>v3</td><td><code>MSE</code></td><td class="w">Pixelvergleich, quadriert</td><td>12.500, ab 0,001 halbierend</td></tr>
+      <tr><td>v4</td><td><code>MSE + 0,00001 × VGG</code></td><td class="w">Pixelvergleich und Vergleich im Blick des Bilderkennungsnetzes, drei Stellen, 32×32</td><td>12.500, ab 0,001 halbierend</td></tr>
+      <tr><td>R0</td><td><code>MSE + 0,000001 × VGG</code></td><td class="w">Wie v4 mit kleinerem Gewicht, 256 Zahlen, 10.000 Bilder</td><td>1.500, ab 0,001 halbierend</td></tr>
+      <tr><td>A2</td><td><code>MSE</code></td><td class="w">Alter Decoder, 256 Zahlen</td><td>1.500, 0,001 fallend</td></tr>
+      <tr class="hl"><td>A1, R1, v5</td><td><code>L1 + 0,2 × (1 − SSIM)</code></td><td class="w">Pixelvergleich und Struktur in kleinen Ausschnitten. A1 mit altem Decoder</td><td>1.500, 0,001 fallend</td></tr>
+      <tr class="hl"><td>B0, v6 Treue (B1)</td><td><code>L1 + 0,2 × (1 − SSIM)</code></td><td class="w">Gleiche Note, länger trainiert. B1 doppelt so breit</td><td>11.250, 0,001 fallend</td></tr>
+      <tr><td>R2, B2</td><td><code>L1 + 0,2 × (1 − SSIM) + 0,1 × VGG normiert + 0,01 × Glättung</code></td><td class="w">Dazu VGG mit normierten Merkmalen und eine Strafe für Sprünge zwischen Nachbarpixeln. B2 auf 48×48</td><td>R2: 300<br>B2: 11.250, 0,001 fallend</td></tr>
+      <tr><td>v6 Natürlichkeit (B3)</td><td><code>L1 + 0,2 × (1 − SSIM) + 0,01 × GAN</code></td><td class="w">Dazu die Note des Fälschungs-Erkenners, ab Schritt 3.375</td><td>11.250, 0,001 fallend</td></tr>
+      <tr><td>B4</td><td><code>wie B2 + 0,01 × GAN</code></td><td class="w">VGG, Glättung und Fälschungs-Erkenner zusammen</td><td>11.250, 0,001 fallend</td></tr>
+      <tr><td>Fälschungs-Erkenner</td><td><code>max(0, 1 − E(echt)) + max(0, 1 + E(gemalt))</code></td><td class="w">Eigene Note des zweiten Netzes, jeweils Durchschnitt über alle Ausschnitte. Lernt ab Schritt 3.375 im selben Schritt mit</td><td>0,0002 fest</td></tr>
     </tbody>
   </table></div>
-  <p class="note">Das kurze VGG-Nachtraining R2 nutzte zusätzlich eine normierte VGG-Variante und eine Glättungsstrafe. Die Kennzahlen Raster und Klassen-Treffer sowie Laplace-Schärfe gehen nie in den Loss ein, sie messen nur hinterher. SSIM und MSE sind auf dieser Seite auch Messwerte. In der Messung nutzt SSIM Fenster von 11×11 Pixeln, im v5-Training 7×7.</p>
+  <p class="note">Alle Läufe nutzen Adam und Stapel von 100 Bildern. „Halbierend“ heißt: Stockt die Note, halbiert sich die Lernrate. „Fallend“ heißt: Die Lernrate sinkt gleichmäßig auf 1 % des Startwerts. Die Kennzahlen Raster und Klassen-Treffer sowie Laplace-Schärfe gehen nie in den Loss ein, sie messen nur hinterher. SSIM und MSE sind auf dieser Seite auch Messwerte. In der Messung nutzt SSIM Fenster von 11×11 Pixeln, im v5-Training 7×7.</p>
 
   <div class="demo" id="l1demo">
     <h3 id="m-mse">L1 und MSE: der gerade Pixelvergleich</h3>
@@ -483,11 +563,11 @@ table.feat td { vertical-align: middle; }
         <tr><td>Ähnlichkeit</td><td>SSIM</td><td class="w">Fenster von 11×11 Pixeln wandert über Original und Nachbild. Je Fenster werden Helligkeit, Kontrast und Struktur verglichen und multipliziert. Durchschnitt über alle Fenster, Farbkanäle und Bilder. Ablauf wie oben bei <a class="mlink" href="#m-ssim">SSIM</a>.</td><td>nahe 1</td></tr>
         <tr><td>Abweichung</td><td>MSE (mittlerer quadratischer Fehler)</td><td class="w">Je Pixel und Farbkanal: Original minus Nachbild, quadriert. Davon der Durchschnitt über alle Bilder. Pixelwerte liegen zwischen 0 und 1. Formel oben bei <a class="mlink" href="#m-mse">L1 und MSE</a>.</td><td>nahe 0</td></tr>
         <tr id="m-nyquist"><td>Raster</td><td>Nyquist-Leistung (Frequenzanalyse)</td><td class="w">Das Nachbild wird mit einer Fourier-Analyse in Wellen verschiedener Feinheit zerlegt. Gemessen wird nur die Energie der feinsten Welle, die ein Pixelraster darstellen kann: hell, dunkel, hell von Pixel zu Pixel, also ein Schachbrett. Gleiche Rechnung am Original ergibt den Vergleichswert 0,056.</td><td>nahe 0,056</td></tr>
-        <tr id="m-knn"><td>Klassen-Treffer</td><td>k-NN (k nächste Nachbarn)</td><td class="w">Jedes Bild wird nur durch seinen Merkzettel vertreten. Von 5.000 Testbildern dienen 4.000 als Nachschlagewerk mit bekannter Klasse. Für jedes der übrigen 1.000 Bilder werden die k ähnlichsten Merkzettel gesucht, die Mehrheit ihrer Klassen ist der Tipp. Der Wert ist der Anteil richtiger Tipps.</td><td>hoch, Raten = 10 %</td></tr>
+        <tr id="m-knn"><td>Klassen-Treffer</td><td>k-NN (k nächste Nachbarn)</td><td class="w">Jedes Bild wird nur durch seinen Code vertreten. Von 5.000 Testbildern dienen 4.000 als Nachschlagewerk mit bekannter Klasse. Für jedes der übrigen 1.000 Bilder werden die k ähnlichsten Codes gesucht, die Mehrheit ihrer Klassen ist der Tipp. Der Wert ist der Anteil richtiger Tipps.</td><td>hoch, Raten = 10 %</td></tr>
         <tr id="m-kid"><td>Natürlichkeit</td><td>KID (Kernel Inception Distance)</td><td class="w">Das Bilderkennungsnetz Inception-V3 fasst jedes Bild als Merkmalsliste zusammen. Dann wird verglichen, wie sich die Merkmale der Nachbilder und der echten Testbilder als Gruppe verteilen, hier 100-mal mit je 1.000 Bildern. Einzelne Bildpaare spielen keine Rolle.</td><td>nahe 0</td></tr>
       </tbody>
     </table></div>
-    <p class="note">SSIM und MSE vergleichen Bild mit Bild. Die Nyquist-Leistung schaut nur auf ein bestimmtes Muster im Nachbild. KID vergleicht ganze Gruppen von Bildern. k-NN schaut gar nicht auf das Bild, sondern nur auf den Merkzettel. Deshalb können die Werte in verschiedene Richtungen zeigen, wie bei v4 und v5.</p>
+    <p class="note">SSIM und MSE vergleichen Bild mit Bild. Die Nyquist-Leistung schaut nur auf ein bestimmtes Muster im Nachbild. KID vergleicht ganze Gruppen von Bildern. k-NN schaut gar nicht auf das Bild, sondern nur auf den Code. Deshalb können die Werte in verschiedene Richtungen zeigen, wie bei v4 und v5.</p>
   </div>
 
   <div class="keys">
@@ -689,7 +769,7 @@ document.getElementById("table").innerHTML = `<thead><tr><th>Lauf</th><th>Was</t
 
 // v6: Prüfer und Schärfefilter
 document.getElementById("prueferTable").innerHTML = `<thead><tr><th>Prüfer</th><th>Abweichung (MSE)</th><th>Ähnlichkeit (SSIM)</th><th>Natürlichkeit (KID)</th><th>VGG-Abstand</th><th>Raster (Nyquist-Leistung)</th></tr></thead><tbody>` +
-  [["L1 + SSIM (B1)",EXTRA.B1],["+ VGG (B2)",EXTRA.B2],["+ GAN (B3)",EXTRA.B3,"hl"],["+ VGG + GAN (B4)",EXTRA.B4]].map(([n,m,h]) => `<tr class="${h||""}"><td>${n}</td><td>${de(m.mse,5)}</td><td>${de(m.ssim,3)}</td><td>${de(m.kid,4)}</td><td>${de(m.vgg_distance,4)}</td><td>${de(m.nyquist_power,3)}</td></tr>`).join("") +
+  [["L1 + SSIM (B1)",EXTRA.B1],["+ VGG + Glättung (B2)",EXTRA.B2],["+ GAN (B3)",EXTRA.B3,"hl"],["+ VGG + Glättung + GAN (B4)",EXTRA.B4]].map(([n,m,h]) => `<tr class="${h||""}"><td>${n}</td><td>${de(m.mse,5)}</td><td>${de(m.ssim,3)}</td><td>${de(m.kid,4)}</td><td>${de(m.vgg_distance,4)}</td><td>${de(m.nyquist_power,3)}</td></tr>`).join("") +
   `<tr><td>Original</td><td></td><td></td><td>0,0000</td><td></td><td>${de(EXTRA.original.nyquist_power,3)}</td></tr></tbody>`;
 document.getElementById("unsharpTable").innerHTML = `<thead><tr><th>Modell, Stärke</th><th>Abweichung (MSE)</th><th>Ähnlichkeit (SSIM)</th><th>Natürlichkeit (KID)</th><th>Raster (Nyquist-Leistung)</th></tr></thead><tbody>` +
   Object.entries(EXTRA.unsharp).flatMap(([tag,rows]) => Object.entries(rows).map(([a,m]) => `<tr><td>${tag}, ${a.replace(".",",")}</td><td>${de(m.mse,5)}</td><td>${de(m.ssim,3)}</td><td>${de(m.kid,4)}</td><td>${de(m.nyquist_power,3)}</td></tr>`)).join("") + "</tbody>";
