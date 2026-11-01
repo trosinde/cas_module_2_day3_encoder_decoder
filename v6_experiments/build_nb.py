@@ -243,10 +243,10 @@ md("unsharp-header", """
 Ein klassischer Filter hebt Kanten an: `Bild + Stärke × (Bild − weichgezeichnetes Bild)`. Er fügt keine Information hinzu. Berechnet mit `phase4a.py`.
 """)
 code("unsharp", """
-unsharp = json.loads((RUNS / "B1_unsharp.json").read_text())
-print(f"{'Stärke':8s}{'MSE':>9s}{'SSIM':>8s}{'Raster':>9s}{'Laplace':>9s}{'KID':>9s}{'VGG':>8s}")
-for amount, m in unsharp.items():
-    print(f"{amount:8s}{m['mse']:9.5f}{m['ssim']:8.3f}{m['nyquist_power']:9.4f}{m['sharpness']:9.4f}{m['kid']:9.4f}{m['vgg_distance']:8.4f}")
+print(f"{'Modell, Stärke':18s}{'MSE':>9s}{'SSIM':>8s}{'Raster':>9s}{'Laplace':>9s}{'KID':>9s}{'VGG':>8s}")
+for tag in (FIDELITY_TAG, NATURAL_TAG):
+    for amount, m in json.loads((RUNS / f"{tag}_unsharp.json").read_text()).items():
+        print(f"{tag + ', ' + amount:18s}{m['mse']:9.5f}{m['ssim']:8.3f}{m['nyquist_power']:9.4f}{m['sharpness']:9.4f}{m['kid']:9.4f}{m['vgg_distance']:8.4f}")
 samples = np.load(RUNS / "B1_unsharp_first10.npz")
 fig, axes = plt.subplots(len(samples.files) + 1, 10, figsize=(16, 7))
 for r, (label, images) in enumerate([("Treue-Modell", predictions[:10])] + [(f"Stärke {k}", samples[k]) for k in samples.files]):
@@ -268,8 +268,9 @@ Ein fertiges Super-Resolution-Modell (BSD-3-Clause, Xintao Wang) vergrößert vo
 code("sr", """
 sr_rows = [("Original, vergrößert", np.kron(np.load(RUNS / "sr_input_original.npy"), np.ones((4, 4, 1)))),
            ("Real-ESRGAN auf Original", np.load(RUNS / "sr_output_original.npy")),
-           (f"Real-ESRGAN auf {FIDELITY_TAG}", np.load(RUNS / "sr_output_B1.npy"))]
-fig, axes = plt.subplots(len(sr_rows), 10, figsize=(16, 5.2))
+           (f"Real-ESRGAN auf {FIDELITY_TAG}", np.load(RUNS / "sr_output_B1.npy")),
+           (f"Real-ESRGAN auf {NATURAL_TAG}", np.load(RUNS / f"sr_output_{NATURAL_TAG}.npy"))]
+fig, axes = plt.subplots(len(sr_rows), 10, figsize=(16, 7))
 for r, (label, images) in enumerate(sr_rows):
     for i in range(10):
         axes[r, i].imshow(images[i], interpolation="nearest")

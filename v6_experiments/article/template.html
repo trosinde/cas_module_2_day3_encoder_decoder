@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-/* Layout: eine einspaltige Lesereise von v1 bis v5, jede Version nach demselben Raster aus Überlegung, Änderung, Bild, Cluster. */
+/* Layout: eine einspaltige Lesereise von v1 bis v6, jede Version nach demselben Raster aus Überlegung, Änderung, Bild, Cluster. */
 :root {
   --bg: #eef2f4; --surface: #ffffff; --fg: #15262e; --muted: #51636c; --line: #cdd8dd;
   --accent: #0f6c7c; --accent-soft: #d3e9ed; --warn: #b4441d; --warn-soft: #f8e2d8; --good: #1c7a4d;
@@ -37,7 +37,7 @@ ul { margin: 0; padding-left: 1.2em; max-width: 68ch; display: grid; gap: 6px; }
 code { font: 400 .85em var(--mono); background: var(--accent-soft); padding: .05em .3em; border-radius: 3px; overflow-wrap: anywhere; }
 .px { image-rendering: pixelated; display: block; width: 100%; }
 .tile { aspect-ratio: 1; background-repeat: no-repeat; background-size: 1000% 100%; image-rendering: pixelated; width: 100%; }
-.series { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.series { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .series figure { margin: 0; display: grid; gap: 4px; }
 .series figcaption { font: 400 .72rem/1.25 var(--mono); color: var(--muted); }
 .series figcaption b { color: var(--fg); font-weight: 600; }
@@ -132,7 +132,7 @@ table.feat td { vertical-align: middle; }
 <div class="wrap">
 
 <header>
-  <div class="eyebrow">Autoencoder auf CIFAR-10 · v1 bis v5</div>
+  <div class="eyebrow">Autoencoder auf CIFAR-10 · v1 bis v6</div>
   <h1>Vom Farbklumpen zum Frosch</h1>
   <p class="lead">Derselbe Frosch, einmal durch jede Version unseres Modells geschickt. Dieses Bild zeigt die ganze Geschichte. Der Rest der Seite erklärt, warum es sich so verändert hat.</p>
   <div class="series" id="hero"></div>
@@ -140,7 +140,8 @@ table.feat td { vertical-align: middle; }
     <h2>Das Wichtigste vorab</h2>
     <p><b>Am meisten hat insgesamt der größere Engpass gebracht:</b> Das Modell darf sich mehr Zahlen pro Bild merken. Dadurch wurde aus grauem Nebel überhaupt erst ein Motiv.</p>
     <p><b>Gegen deine Fraktale half der Umbau des Modells:</b> Ein neuer Decoder und ein Engpass, der den Ort im Bild behält. Das senkte das Raster auf ein Zehntel und die Abweichung um 62 %, bei sonst gleichen Bedingungen.</p>
-    <p><b>Nicht gelöst:</b> Die Bilder sind besser, aber nicht fotoscharf. Beim Sortieren nach Klassen liegt v5 hinter v3 und v4.</p>
+    <p><b>Längeres Training war der nächste große Schritt:</b> v6 schlägt damit erstmals die klassische PCA. Ein zusätzlicher Fälschungs-Erkenner macht die Bilder messbar natürlicher.</p>
+    <p><b>Nicht gelöst:</b> Die Bilder sind besser, aber nicht fotoscharf. Beim Sortieren nach Klassen liegen v5 und v6 hinter v3 und v4.</p>
   </div>
 </header>
 
@@ -171,6 +172,7 @@ table.feat td { vertical-align: middle; }
     <div class="key"><b>Abweichung (MSE)</b>Wie weit jedes Pixel im Schnitt vom Original entfernt ist. Niedriger ist besser.</div>
     <div class="key"><b>Raster (Nyquist-Leistung)</b>Wie stark Pixel im feinsten Schachbrett-Takt hell und dunkel wechseln. Das Original liegt bei 0,056. Weit darüber heißt: künstliches Muster.</div>
     <div class="key"><b>Klassen-Treffer (k-NN)</b>Ein einfaches Verfahren schaut, welche Bilder im Merkzettel am nächsten liegen, und rät daraus die Klasse. Blindes Raten träfe 10 %.</div>
+    <div class="key"><b>Natürlichkeit (KID)</b>Ein fertiges Bilderkennungsnetz vergleicht, wie sich die Nachbilder als Gruppe von echten Fotos unterscheiden. 0 heißt: nicht unterscheidbar. Niedriger ist besser.</div>
   </div>
 
   <h3>So liest du die Cluster-Bilder</h3>
@@ -270,6 +272,37 @@ table.feat td { vertical-align: middle; }
   </div>
 </section>
 
+<section class="version" data-v="v6">
+  <div class="head"><span class="tag">v6</span><h2>Länger trainieren und breiter bauen</h2></div>
+  <div class="steps">
+    <div class="step you"><h3>Die offene Frage</h3>v5 hatte nur 1.500 Schritte auf der CPU. Lag der Rückstand auf die PCA am Modell oder nur an der kurzen Zeit?</div>
+    <div class="step"><h3>Meine Änderung</h3>Erst nur länger: 11.250 statt 1.500 Schritte, alle 45.000 Bilder, auf der GPU. Das allein schlägt die PCA schon (MSE 0,00091). Danach das Modell doppelt so breit, mit rund 4-mal so vielen Reglern.</div>
+    <div class="step"><h3>Was passiert ist</h3>Abweichung 0,00077 und SSIM 0,963, beides besser als PCA 512. Keine Fraktale. Feine Texturen bleiben weich, und der Klassen-Treffer liegt mit 22,8 % auf dem Niveau von v5.</div>
+  </div>
+</section>
+
+<section class="version" data-v="v6g">
+  <div class="head"><span class="tag">v6</span><h2>Ein Fälschungs-Erkenner als dritter Prüfer</h2></div>
+  <div class="steps">
+    <div class="step you"><h3>Die offene Frage</h3>Wie viel Natürlichkeit bringt ein Prüfer, der echte Bilder von nachgemalten unterscheiden soll, und was kostet das an Genauigkeit?</div>
+    <div class="step"><h3>Meine Änderung</h3>Ein kleines zweites Netz (PatchGAN) bewertet Bildausschnitte, der Autoencoder lernt, es zu täuschen. Der erste Versuch mit Gewicht 0,1 kippte: Die Prüfnote stieg von 0,032 auf bis zu 0,31. Mit Gewicht 0,01 blieb das Training stabil.</div>
+    <div class="step"><h3>Was passiert ist</h3>Die Natürlichkeit verbessert sich klar (KID 0,0125 statt 0,0216), die Abweichung steigt nur leicht auf 0,00089. Das Raster kommt mit 0,051 nahe ans Original. Beim Hinschauen ist der Unterschied bei diesen kleinen Bildern gering.</div>
+  </div>
+  <div class="demo">
+    <h3>Vier Prüfer im Vergleich</h3>
+    <div class="tablewrap"><table id="prueferTable"></table></div>
+    <p class="note">Testset mit 10.000 Bildern, je 11.250 Schritte auf dem breiten Modell. Mit VGG lief das Netz auf 48×48 statt 64×64 Pixeln, weil der Grafikspeicher sonst nicht reichte. Der Lauf mit VGG und GAN ist fast gleichauf, sein Raster liegt aber über dem Original. Diese Grenze stand vor den Läufen fest, deshalb zählt der Lauf nur mit GAN als Natürlichkeits-Modell.</p>
+  </div>
+  <div class="demo">
+    <h3>Schärfer als das Original?</h3>
+    <p><b>Ein Schärfefilter (Unsharp Mask)</b> hebt nur vorhandene Kanten an und fügt keine Information hinzu. Er macht die Bilder natürlicher, aber ungenauer. Beim Treue-Modell entsteht ab Stärke 1,0 mehr Raster als im Original, beim Natürlichkeits-Modell schon ab 0,5.</p>
+    <div class="tablewrap"><table id="unsharpTable"></table></div>
+    <p><b>Ein fertiges Vergrößerungsmodell (Real-ESRGAN)</b> macht aus 32×32 Pixeln ganze 128×128. Das wirkt verblüffend scharf, aber die Details sind erfunden. Die rote Schrift auf Bild 4 wird scharf und bleibt unleserlich. Zu CIFAR-10 gibt es keine höher aufgelöste Fassung, darum lässt sich nicht messen, ob die Details stimmen.</p>
+    <p class="cap note">Oben Original vergrößert, Mitte Real-ESRGAN auf dem Original, unten Real-ESRGAN auf dem Natürlichkeits-Modell.</p>
+    <img class="px" alt="Originale, vergrößert" data-src="original"><img class="px" alt="Real-ESRGAN auf den Originalen" data-src="sr_original"><img class="px" alt="Real-ESRGAN auf dem Natürlichkeits-Modell" data-src="sr_B3">
+  </div>
+</section>
+
 <section>
   <div class="eyebrow">Selbst vergleichen</div>
   <h2>Ein Bild durch alle Versionen</h2>
@@ -329,12 +362,16 @@ table.feat td { vertical-align: middle; }
       <p>Auf dem alten Decoder: SSIM +0,10, Raster halbiert, Abweichung 8 % kleiner. Hilfreich und billig, aber er allein hätte die Fraktale nicht beseitigt.</p></div>
     <div><span class="n">4</span><h3>Noch mehr Zahlen: von 256 auf 512 (R1 zu v5)</h3>
       <p>SSIM +0,036, Abweichung rund 27 % kleiner. Sichtbar, zum Beispiel an der Schrift auf Bild 4.</p></div>
+    <div><span class="n">5</span><h3>Länger trainieren: von 1.500 auf 11.250 Schritte (v5 zu B0)</h3>
+      <p>Abweichung 58 % kleiner, SSIM +0,053, bei gleichem Modell und Prüfer. Dafür stieg das Raster von 0,007 auf 0,019, bleibt aber weit unter dem Original.</p></div>
+    <div><span class="n">6</span><h3>Der Fälschungs-Erkenner (B1 zu B3)</h3>
+      <p>Der einzige Prüfer, der die Natürlichkeit klar verbessert: KID 42 % niedriger. Das kostet rund 16 % mehr Abweichung.</p></div>
   </div>
 
   <h3>Was wenig oder nichts brachte</h3>
   <ul>
     <li><b>VAE (v2):</b> SSIM und Abweichung praktisch unverändert. Er ist für eine andere Aufgabe gebaut.</li>
-    <li><b>VGG-Prüfer:</b> Für die Bilder ein Rückschritt: v4 hat gegenüber v3 mehr Abweichung, weniger SSIM und rund 140-mal mehr Raster. Nur der Klassen-Treffer steigt. Auf dem neuen Decoder fast kein Effekt. Das Nachtraining dort war mit 300 Schritten kurz, ein voller Lauf könnte anders ausgehen.</li>
+    <li><b>VGG-Prüfer:</b> Für die Bilder ein Rückschritt: v4 hat gegenüber v3 mehr Abweichung, weniger SSIM und rund 140-mal mehr Raster. Nur der Klassen-Treffer steigt. Auf dem neuen Decoder änderte selbst ein voller Lauf (B2) bei Abweichung, SSIM und KID nichts Messbares, nur der VGG-Abstand sank um 9 %.</li>
     <li><b>Die Kennzahl Laplace-Schärfe aus v4:</b> Sie bewertete v4 besser als v5, obwohl v4 sichtbar schlechter ist. Sie misst Kanten, egal ob echt oder Muster.</li>
   </ul>
 
@@ -344,16 +381,15 @@ table.feat td { vertical-align: middle; }
 
   <h3>Wo es noch hakt</h3>
   <ul>
-    <li><b>Nicht fotoscharf.</b> Feine Texturen wie Fell oder Blätter fehlen weiterhin.</li>
-    <li><b>Eine einfache Rechenmethode liegt noch vorn.</b> PCA, ein klassisches lineares Verfahren, erreicht bei 512 Zahlen eine halb so große Abweichung. Das Ziel, mindestens mit PCA gleichzuziehen, ist verfehlt.</li>
-    <li><b>Kurzes Training.</b> v5 hatte nur 1.500 Schritte auf der CPU. Ob längeres Training den Abstand schließt, ist offen.</li>
+    <li><b>Nicht fotoscharf.</b> Feine Texturen wie Fell oder Blätter fehlen weiterhin. Auch der Fälschungs-Erkenner ändert das beim Hinschauen nur wenig.</li>
     <li><b>Klassen schlechter als in v3 und v4.</b> Bildqualität und Sortieren nach Klassen sind verschiedene Ziele. Der beste Klassen-Treffer stammt vom Modell mit dem stärksten Raster.</li>
+    <li><b>Einzelne Läufe.</b> Jeder Vergleich beruht auf einem Lauf. Kleine Unterschiede, etwa zwischen dem Lauf ohne und mit VGG, sind nicht von Zufall zu trennen.</li>
   </ul>
 
   <h3>Sinnvolle nächste Schritte</h3>
   <ul>
-    <li><b>Für schärfere Bilder:</b> Erst auf dem schnelleren Rechner länger trainieren. Danach ein Adversarial-Prüfer, also ein zweites Netz, das Fälschungen von echten Bildern unterscheiden lernt.</li>
-    <li><b>Für Klassen:</b> Dem Modell die Klassen im Training zeigen, etwa mit einem zusätzlichen Klassifikator am Engpass. Das wäre ein eigenes v6.</li>
+    <li><b>Für Klassen:</b> Dem Modell die Klassen im Training zeigen, etwa mit einem zusätzlichen Klassifikator am Engpass.</li>
+    <li><b>Für echte Details:</b> Ein Vergrößerungsmodell mit Bildern trainieren, die auch in hoher Auflösung vorliegen. Nur dann lässt sich prüfen, ob erfundene Details stimmen.</li>
   </ul>
 </section>
 
@@ -378,7 +414,8 @@ table.feat td { vertical-align: middle; }
       <tr><td>v2</td><td><code>BCE + KL</code></td><td class="w">Pixelvergleich, dazu eine Strafe, die den Merkzettel-Raum glatt hält</td></tr>
       <tr><td>v3</td><td><code>MSE</code></td><td class="w">Pixelvergleich, quadriert</td></tr>
       <tr><td>v4</td><td><code>MSE + 0,00001 × VGG</code></td><td class="w">Pixelvergleich und Vergleich im Blick des Bilderkennungsnetzes</td></tr>
-      <tr class="hl"><td>v5</td><td><code>L1 + 0,2 × (1 − SSIM)</code></td><td class="w">Pixelvergleich und Struktur in kleinen Ausschnitten</td></tr>
+      <tr class="hl"><td>v5, v6 Treue</td><td><code>L1 + 0,2 × (1 − SSIM)</code></td><td class="w">Pixelvergleich und Struktur in kleinen Ausschnitten</td></tr>
+      <tr><td>v6 Natürlichkeit</td><td><code>L1 + 0,2 × (1 − SSIM) + 0,01 × GAN</code></td><td class="w">Dazu die Note des Fälschungs-Erkenners</td></tr>
     </tbody>
   </table></div>
   <p class="note">Das kurze VGG-Nachtraining R2 nutzte zusätzlich eine normierte VGG-Variante und eine Glättungsstrafe. Die Kennzahlen Raster und Klassen-Treffer sowie Laplace-Schärfe gehen nie in den Loss ein, sie messen nur hinterher. SSIM und MSE sind auf dieser Seite auch Messwerte. In der Messung nutzt SSIM Fenster von 11×11 Pixeln, im v5-Training 7×7.</p>
@@ -450,8 +487,8 @@ const FEAT = {{FEAT}};
 const CLASSES = ["Flugzeug","Auto","Vogel","Katze","Hirsch","Hund","Frosch","Pferd","Schiff","Lastwagen"];
 // Echte CIFAR-10-Labels der zehn Beispielbilder (x_test[:10]).
 const SAMPLE_LABELS = [3,8,8,0,6,6,1,6,3,1];
-const NAMES = {v1:"v1", v2:"v2 VAE", v3:"v3", v4:"v4", v5:"v5"};
-const CAP = {v1:"2 Zahlen", v2:"2 Zahlen", v3:"32 Zahlen", v4:"32 Zahlen", v5:"512 Zahlen"};
+const NAMES = {v1:"v1", v2:"v2 VAE", v3:"v3", v4:"v4", v5:"v5", v6:"v6", v6g:"v6 GAN"};
+const CAP = {v1:"2 Zahlen", v2:"2 Zahlen", v3:"32 Zahlen", v4:"32 Zahlen", v5:"512 Zahlen", v6:"512 Zahlen, Treue", v6g:"512 Zahlen, Natürlichkeit"};
 const de = (x, d) => x.toLocaleString("de-DE", {minimumFractionDigits:d, maximumFractionDigits:d}).replace(/[’']/g, ".");
 const pct = x => de(x*100, 1) + " %";
 const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
@@ -464,7 +501,7 @@ document.querySelectorAll(".tile[data-strip]").forEach(t => setTile(t, t.dataset
 document.querySelectorAll("img[data-src]").forEach(i => { i.src = IMG[i.dataset.src]; });
 
 const hero = document.getElementById("hero");
-[["original","Original","3.072 Zahlen"],["v1","v1","2 Zahlen"],["v2","v2","2 Zahlen, VAE"],["v3","v3","32 Zahlen"],["v4","v4","32 Zahlen"],["v5","v5","512 Zahlen"]].forEach(([k,n,c]) => {
+[["original","Original","3.072 Zahlen"],["v1","v1","2 Zahlen"],["v2","v2","2 Zahlen, VAE"],["v3","v3","32 Zahlen"],["v4","v4","32 Zahlen"],["v5","v5","512 Zahlen"],["v6","v6","512 Zahlen, Treue"],["v6g","v6 GAN","512 Zahlen, Natürlichkeit"]].forEach(([k,n,c]) => {
   const f = el("figure"); const t = el("div","tile"); setTile(t,k,7);
   f.append(t, el("figcaption","",`<b>${n}</b><br>${c}`)); hero.append(f);
 });
@@ -480,17 +517,17 @@ function bars(id, rows, max, fmt) {
     host.append(row);
   });
 }
-bars("squeeze", [{name:"Original",v:3072,cls:"ref"},{name:"v5",v:512,cls:"best"},{name:"v3 und v4",v:32},{name:"v1 und v2",v:2}], 3072, x => x.toLocaleString("de-DE").replace(/[’']/g,"."));
+bars("squeeze", [{name:"Original",v:3072,cls:"ref"},{name:"v5 und v6",v:512,cls:"best"},{name:"v3 und v4",v:32},{name:"v1 und v2",v:2}], 3072, x => x.toLocaleString("de-DE").replace(/[’']/g,"."));
 
 const V = DATA.versions;
 bars("ssim", [
   {name:"v1",v:V.v1.ssim},{name:"v2 VAE",v:V.v2.ssim},{name:"v3",v:V.v3.ssim},{name:"v4",v:V.v4.ssim},
-  {name:"v5",v:V.v5.ssim,cls:"best"},{name:"PCA 512 zum Vergleich",v:EXTRA.pca512.ssim,cls:"ref"}], 1, x => de(x,3));
+  {name:"v5",v:V.v5.ssim},{name:"v6",v:V.v6.ssim,cls:"best"},{name:"v6 GAN",v:V.v6g.ssim},{name:"PCA 512 zum Vergleich",v:EXTRA.pca512.ssim,cls:"ref"}], 1, x => de(x,3));
 bars("ras", [
   {name:"Original",v:EXTRA.original.nyquist_power,cls:"ref"},{name:"v1",v:V.v1.nyquist_power},{name:"v2 VAE",v:V.v2.nyquist_power},{name:"v3",v:V.v3.nyquist_power},
-  {name:"v4",v:V.v4.nyquist_power,cls:"warn"},{name:"v5",v:V.v5.nyquist_power,cls:"best"}], V.v4.nyquist_power, x => de(x,3));
+  {name:"v4",v:V.v4.nyquist_power,cls:"warn"},{name:"v5",v:V.v5.nyquist_power},{name:"v6",v:V.v6.nyquist_power},{name:"v6 GAN",v:V.v6g.nyquist_power}], V.v4.nyquist_power, x => de(x,3));
 bars("knn", [
-  {name:"Raten",v:.1,cls:"ref"},{name:"v1",v:V.v1.knn},{name:"v2 VAE",v:V.v2.knn},{name:"v3",v:V.v3.knn},{name:"v4",v:V.v4.knn,cls:"best"},{name:"v5",v:V.v5.knn},{name:"Rohe Pixel",v:.269,cls:"ref"}], .5, pct);
+  {name:"Raten",v:.1,cls:"ref"},{name:"v1",v:V.v1.knn},{name:"v2 VAE",v:V.v2.knn},{name:"v3",v:V.v3.knn},{name:"v4",v:V.v4.knn,cls:"best"},{name:"v5",v:V.v5.knn},{name:"v6",v:V.v6.knn},{name:"v6 GAN",v:V.v6g.knn},{name:"Rohe Pixel",v:.269,cls:"ref"}], .5, pct);
 
 // Cluster
 let currentImage = 7;
@@ -556,13 +593,13 @@ document.querySelectorAll("section.version").forEach(sec => {
 const chips = document.getElementById("chips");
 SAMPLE_LABELS.forEach((l,i) => { const b = el("button","",`Bild ${i+1}: ${CLASSES[l]}`); b.type="button"; b.addEventListener("click",()=>setImage(i)); chips.append(b); });
 const multi = document.getElementById("multi");
-["v1","v2","v3","v4","v5"].forEach(v => {
+["v1","v2","v3","v4","v5","v6","v6g"].forEach(v => {
   const p = el("div","panel"); p.append(el("div","cap",`<b>${NAMES[v]}</b>, ${CAP[v]}`)); p.append(clusterCanvas(v)); multi.append(p);
 });
 
 // Bildvergleich
 const pick = document.getElementById("pick"), big = document.getElementById("big");
-const CMP = [["original","Original","3.072 Zahlen"],["v1","v1","2 Zahlen"],["v2","v2","2 Zahlen, VAE"],["v3","v3","32 Zahlen"],["v4","v4","32 Zahlen, Raster"],["v5_256","v5 klein","256 Zahlen"],["v5","v5","512 Zahlen"]];
+const CMP = [["original","Original","3.072 Zahlen"],["v1","v1","2 Zahlen"],["v2","v2","2 Zahlen, VAE"],["v3","v3","32 Zahlen"],["v4","v4","32 Zahlen, Raster"],["v5_256","v5 klein","256 Zahlen"],["v5","v5","512 Zahlen"],["v6","v6","512 Zahlen, Treue"],["v6g","v6 GAN","512 Zahlen, Natürlichkeit"]];
 const bigT = CMP.map(([k,n,c]) => { const f = el("figure"); const t = el("div","tile"); f.append(t, el("figcaption","",`<b>${n}</b><br>${c}`)); big.append(f); return [t,k]; });
 function show(i) {
   bigT.forEach(([t,k]) => setTile(t,k,i));
@@ -578,9 +615,16 @@ const rows = [
   ["R0","Nachlauf: alter Decoder, MSE + VGG, 10.000 Bilder","256",EXTRA.R0],
   ["A2","alter Decoder, MSE","256",EXTRA.A2],["A1","alter Decoder, L1 + SSIM","256",EXTRA.A1],
   ["R1","neue Architektur, L1 + SSIM","256",EXTRA.R1],["R2","R1 + 300 Schritte VGG","256",EXTRA.R2],
-  ["v5","neue Architektur, L1 + SSIM","512",V.v5,"hl"],["PCA 512","klassisches Vergleichsverfahren","512",EXTRA.pca512]];
+  ["v5","neue Architektur, L1 + SSIM","512",V.v5,"hl"],["B0","wie v5, aber 11.250 Schritte","512",EXTRA.B0],["v6","B1: wie B0, doppelt so breit","512",V.v6,"hl"],["B2","B1 + VGG und Glättung","512",EXTRA.B2],["v6 GAN","B3: B1 + Fälschungs-Erkenner","512",V.v6g,"hl"],["B4","B1 + VGG und Fälschungs-Erkenner","512",EXTRA.B4],["PCA 512","klassisches Vergleichsverfahren","512",EXTRA.pca512]];
 document.getElementById("table").innerHTML = `<thead><tr><th>Lauf</th><th>Was</th><th>Zahlen</th><th>SSIM</th><th>Abweichung</th><th>Raster</th></tr></thead><tbody>` +
   rows.map(([a,b,c,m,h]) => `<tr class="${h||""}"><td>${a}</td><td class="w">${b}</td><td>${c}</td><td>${de(m.ssim,3)}</td><td>${de(m.mse,5)}</td><td>${de(m.nyquist_power,3)}</td></tr>`).join("") + "</tbody>";
+
+// v6: Prüfer und Schärfefilter
+document.getElementById("prueferTable").innerHTML = `<thead><tr><th>Prüfer</th><th>Abweichung</th><th>SSIM</th><th>KID</th><th>VGG-Abstand</th><th>Raster</th></tr></thead><tbody>` +
+  [["L1 + SSIM (B1)",EXTRA.B1],["+ VGG (B2)",EXTRA.B2],["+ GAN (B3)",EXTRA.B3,"hl"],["+ VGG + GAN (B4)",EXTRA.B4]].map(([n,m,h]) => `<tr class="${h||""}"><td>${n}</td><td>${de(m.mse,5)}</td><td>${de(m.ssim,3)}</td><td>${de(m.kid,4)}</td><td>${de(m.vgg_distance,4)}</td><td>${de(m.nyquist_power,3)}</td></tr>`).join("") +
+  `<tr><td>Original</td><td></td><td></td><td>0,0000</td><td></td><td>${de(EXTRA.original.nyquist_power,3)}</td></tr></tbody>`;
+document.getElementById("unsharpTable").innerHTML = `<thead><tr><th>Modell, Stärke</th><th>Abweichung</th><th>SSIM</th><th>KID</th><th>Raster</th></tr></thead><tbody>` +
+  Object.entries(EXTRA.unsharp).flatMap(([tag,rows]) => Object.entries(rows).map(([a,m]) => `<tr><td>${tag}, ${a.replace(".",",")}</td><td>${de(m.mse,5)}</td><td>${de(m.ssim,3)}</td><td>${de(m.kid,4)}</td><td>${de(m.nyquist_power,3)}</td></tr>`)).join("") + "</tbody>";
 
 // Kante und Stempel
 document.querySelectorAll(".cells").forEach(h => {

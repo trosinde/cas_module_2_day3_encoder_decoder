@@ -33,5 +33,6 @@ Zum Neutrainieren in den Parametern eines Notebooks `TRAIN_MODEL = True` setzen.
 | `..._v4_perceptual_loss` | VGG-Prüfer, Fraktale, bester Klassen-Treffer |
 | `..._v4b_nachlauf_256` | Nachlauf mit 256 Zahlen, Vergleichswert für v5 |
 | `..._v5_sharp_decoder` | Neuer Decoder, Karte als Engpass, L1 + SSIM |
+| `..._v6_sharpness` | Längeres Training, GAN, Schärfefilter, Real-ESRGAN |
 
-v6 folgt nach Abschluss der Läufe. Skripte und Messwerte liegen in `v5_experiments/` und `v6_experiments/`.
+Skripte und Messwerte liegen in `v5_experiments/` und `v6_experiments/`.
