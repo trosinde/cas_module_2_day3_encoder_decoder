@@ -140,7 +140,7 @@ table.feat td { vertical-align: middle; }
     <h2>Das Wichtigste vorab</h2>
     <p><b>Am meisten hat insgesamt der größere Engpass gebracht:</b> Das Modell darf sich mehr Zahlen pro Bild merken. Dadurch wurde aus grauem Nebel überhaupt erst ein Motiv.</p>
     <p><b>Gegen deine Fraktale half der Umbau des Modells:</b> Ein neuer Decoder und ein Engpass, der den Ort im Bild behält. Das senkte das Raster auf ein Zehntel und die Abweichung um 62 %, bei sonst gleichen Bedingungen.</p>
-    <p><b>Nicht gelöst:</b> Die Bilder sind besser, aber nicht fotoscharf. Das Sortieren nach Klassen ist sogar schlechter als in v3.</p>
+    <p><b>Nicht gelöst:</b> Die Bilder sind besser, aber nicht fotoscharf. Beim Sortieren nach Klassen liegt v5 hinter v3 und v4.</p>
   </div>
 </header>
 
@@ -201,7 +201,7 @@ table.feat td { vertical-align: middle; }
   <div class="steps">
     <div class="step you"><h3>Deine Überlegung</h3>Im Cluster-Bild ist nur ein riesiger Klumpen zu sehen. Was lässt sich tun, um die Klassifizierung zu verbessern?</div>
     <div class="step"><h3>Meine Änderung</h3>Engpass von 2 auf 32 Zahlen, eine Rechenstufe mehr, 25 statt 5 Durchgänge, MSE als Prüfer. Dazu t-SNE und die k-NN-Messung, damit wir eine Zahl statt nur eines Eindrucks haben.</div>
-    <div class="step"><h3>Was passiert ist</h3>Der größte Sprung der ganzen Reise: Erstmals sind Motive erkennbar. Bei den Klassen ist es der beste Wert aller Versionen. Aber die Bilder sind sehr weich.</div>
+    <div class="step"><h3>Was passiert ist</h3>Der größte Sprung der ganzen Reise: Erstmals sind Motive erkennbar. Auch der Klassen-Treffer macht einen klaren Sprung. Aber die Bilder sind sehr weich.</div>
   </div>
   <div class="demo">
     <h3>Warum der MSE-Prüfer weich malt</h3>
@@ -218,10 +218,10 @@ table.feat td { vertical-align: middle; }
   <div class="head"><span class="tag">v4</span><h2>Ein zweiter Prüfer, und die Fraktale kommen</h2></div>
   <div class="steps">
     <div class="step you"><h3>Deine Überlegung</h3>Die Bilder sind weiter deutlich unscharf. Nach dem Lauf dann: Sie sind näher am Original, haben aber starke Fraktale und wirken immer noch unscharf.</div>
-    <div class="step"><h3>Meine Änderung</h3>Engpass auf 256 Zahlen. Zusätzlich vergleicht ein fertig trainiertes Bilderkennungsnetz (VGG16) Formen und Texturen. Wegen der CPU nur 10.000 Bilder.</div>
-    <div class="step"><h3>Was passiert ist</h3>Mehr Struktur, aber das Raster ist 16-mal so stark wie im Original. Die neu gemessene Bildschärfe wirkte gut, zeigte aber vor allem das Raster.</div>
+    <div class="step"><h3>Meine Änderung</h3>Gleiches Modell und gleicher Engpass wie v3, also 32 Zahlen. Neu ist nur der Prüfer: Zusätzlich vergleicht ein fertig trainiertes Bilderkennungsnetz (VGG16) Formen und Texturen.</div>
+    <div class="step"><h3>Was passiert ist</h3>Das Raster ist rund 106-mal so stark wie im Original, Abweichung und SSIM sind schlechter als in v3. Die neu gemessene Bildschärfe wirkte fast wie im Original, zeigte aber vor allem das Raster. Überraschend: Der Klassen-Treffer steigt auf 41,9 %, den besten Wert aller Versionen.</div>
   </div>
-  <p class="note">Von deinem v4-Lauf waren weder Ausgaben noch Modell gespeichert. Die Bilder und Zahlen hier stammen aus einem Nachlauf mit demselben Modell und Prüfer. Einziger Unterschied: Die Zwischenkontrolle nutzte Trainingsbilder statt Testbilder.</p>
+  <p class="note">Bilder und Zahlen stammen aus dem v4-Lauf mit 25 Durchgängen und allen 50.000 Trainingsbildern. Ein zweiter Lauf mit gleichem Engpass zeigte ein noch stärkeres Raster: 51,2 bei SSIM 0,376 und 37,4 % Klassen-Treffer. Für den Vergleich mit dem neuen Decoder gibt es zusätzlich den Nachlauf R0 mit 256 Zahlen, 10.000 Bildern und kleinerem VGG-Gewicht: Raster 0,90, SSIM 0,663, Klassen-Treffer 26,6 %.</p>
 
   <div class="demo">
     <h3>Woher das Raster kommt: der Stempel-Effekt</h3>
@@ -234,7 +234,7 @@ table.feat td { vertical-align: middle; }
 
   <div class="demo">
     <h3>Warum VGG das Raster verstärkt</h3>
-    <p>Der neue Prüfer schaut durch Filter, die Bilder stark verkleinern. Sehr feine Muster sieht er dabei nur schlecht. Sein Urteil zählte zudem am Ende rund zehnmal so viel wie der Pixelvergleich. Das Modell konnte also feines Muster malen, solange die Texturen für den Prüfer ungefähr stimmten. Die Messung passt dazu: Beim alten Decoder lag das Raster mit VGG rund fünfmal höher als ohne. Der Lauf mit VGG hatte allerdings auch weniger Trainingsbilder.</p>
+    <p>Der neue Prüfer schaut durch Filter, die Bilder stark verkleinern. Sehr feine Muster sieht er dabei nur schlecht. Sein Urteil zählte zudem am untrainierten Modell rund 55-mal so viel wie der Pixelvergleich. Das Modell konnte also feines Muster malen, solange die Texturen für den Prüfer ungefähr stimmten. Die Messung passt dazu: Bei gleichem Modell und Engpass liegt das Raster mit VGG rund 140-mal höher als in v3.</p>
     <div>
       <p class="cap note">Oben Original, Mitte v4, unten der Unterschied zum Original, vierfach verstärkt. Je bunter, desto mehr Abweichung.</p>
       <img class="px" alt="Originale" data-src="original"><img class="px" alt="Rekonstruktionen v4" data-src="v4"><img class="px" alt="Differenz v4" data-src="v4_diff">
@@ -252,7 +252,7 @@ table.feat td { vertical-align: middle; }
 
   <div class="demo">
     <h3>Der wichtigste Umbau: Karte statt Zusammenfassung</h3>
-    <p>Bisher quetschte das Modell das Bild erst auf ein Raster von 2×2 Feldern und dann in eine lange Liste. Jede Information über den Ort musste diesen Umweg überleben. Jetzt bleibt der Merkzettel eine grobe Karte mit 8×8 Feldern. In jedem Feld stehen ein paar Zahlen darüber, was genau dort im Bild ist. Die Gesamtzahl kann dabei gleich bleiben: 8×8×4 sind 256 Zahlen, wie bei v4.</p>
+    <p>Bisher quetschte das Modell das Bild erst auf ein Raster von 2×2 Feldern und dann in eine lange Liste. Jede Information über den Ort musste diesen Umweg überleben. Jetzt bleibt der Merkzettel eine grobe Karte mit 8×8 Feldern. In jedem Feld stehen ein paar Zahlen darüber, was genau dort im Bild ist. Die Gesamtzahl kann dabei gleich bleiben: 8×8×4 sind 256 Zahlen, wie beim Nachlauf R0.</p>
     <div class="grids">
       <div><div class="gridbox" id="g2"></div><b>Alt: 2×2 Felder</b>Viel Inhalt, kaum Ort</div>
       <div><div class="gridbox" id="g8"></div><b>Neu: 8×8 Felder</b>Weniger Inhalt pro Feld, aber mit Ort</div>
@@ -283,7 +283,7 @@ table.feat td { vertical-align: middle; }
 <section>
   <div class="eyebrow">Alle Versionen im Vergleich</div>
   <h2>Sortiert das Modell nach Klassen?</h2>
-  <p>Kaum, in keiner Version. Einzelne Klassen rücken etwas zusammen, klare Inseln entstehen nicht. Das liegt am Ziel: Das Modell soll nur gut nachmalen und erfährt nie, was eine Klasse ist. Ein rotes und ein weißes Auto haben keinen Grund, nah beieinander zu liegen.</p>
+  <p>Nur ansatzweise. Einzelne Klassen rücken etwas zusammen, klare Inseln entstehen nicht. Am weitesten kommt v4, vermutlich weil sein Prüfer mit den Merkmalen eines Bilderkennungsnetzes rechnet. Gemessen ist dieser Grund nicht. Die Grenze liegt am Ziel: Das Modell soll nur gut nachmalen und erfährt nie, was eine Klasse ist. Ein rotes und ein weißes Auto haben keinen Grund, nah beieinander zu liegen.</p>
   <div class="ctl" id="chips"></div>
   <p class="note">Rot sind alle Bilder derselben Klasse, der gelbe Rand zeigt das gewählte Bild. Grau sind alle übrigen Testbilder.</p>
   <div class="multi" id="multi"></div>
@@ -320,20 +320,20 @@ table.feat td { vertical-align: middle; }
   <h3>Was wenig oder nichts brachte</h3>
   <ul>
     <li><b>VAE (v2):</b> SSIM und Abweichung praktisch unverändert. Er ist für eine andere Aufgabe gebaut.</li>
-    <li><b>VGG-Prüfer:</b> Auf dem alten Decoder etwas mehr Struktur (SSIM +0,03), aber rund fünfmal mehr Raster. Auf dem neuen Decoder fast kein Effekt. Das Nachtraining dort war mit 300 Schritten kurz, ein voller Lauf könnte anders ausgehen.</li>
+    <li><b>VGG-Prüfer:</b> Für die Bilder ein Rückschritt: v4 hat gegenüber v3 mehr Abweichung, weniger SSIM und rund 140-mal mehr Raster. Nur der Klassen-Treffer steigt. Auf dem neuen Decoder fast kein Effekt. Das Nachtraining dort war mit 300 Schritten kurz, ein voller Lauf könnte anders ausgehen.</li>
     <li><b>Die Kennzahl Laplace-Schärfe aus v4:</b> Sie bewertete v4 besser als v5, obwohl v4 sichtbar schlechter ist. Sie misst Kanten, egal ob echt oder Muster.</li>
   </ul>
 
   <h3>Alle Zahlen im Überblick</h3>
   <div class="tablewrap"><table id="table"></table></div>
-  <p class="note">Testset mit 10.000 Bildern. R0 ist die v4-Nachstellung. A1, A2 und R1 hatten dieselben 30.000 Bilder und 1.500 Schritte. v3 hatte etwa 12.500 Schritte, deshalb ist der Vergleich v3 zu A2 nicht fair und hier nicht als eigene Stufe gewertet.</p>
+  <p class="note">Testset mit 10.000 Bildern. R0 ist der Nachlauf mit 256 Zahlen. A1, A2 und R1 hatten dieselben 30.000 Bilder und 1.500 Schritte. v3 hatte etwa 12.500 Schritte, deshalb ist der Vergleich v3 zu A2 nicht fair und hier nicht als eigene Stufe gewertet.</p>
 
   <h3>Wo es noch hakt</h3>
   <ul>
     <li><b>Nicht fotoscharf.</b> Feine Texturen wie Fell oder Blätter fehlen weiterhin.</li>
     <li><b>Eine einfache Rechenmethode liegt noch vorn.</b> PCA, ein klassisches lineares Verfahren, erreicht bei 512 Zahlen eine halb so große Abweichung. Das Ziel, mindestens mit PCA gleichzuziehen, ist verfehlt.</li>
     <li><b>Kurzes Training.</b> v5 hatte nur 1.500 Schritte auf der CPU. Ob längeres Training den Abstand schließt, ist offen.</li>
-    <li><b>Klassen schlechter als in v3.</b> Bildqualität und Sortieren nach Klassen sind verschiedene Ziele.</li>
+    <li><b>Klassen schlechter als in v3 und v4.</b> Bildqualität und Sortieren nach Klassen sind verschiedene Ziele. Der beste Klassen-Treffer stammt vom Modell mit dem stärksten Raster.</li>
   </ul>
 
   <h3>Sinnvolle nächste Schritte</h3>
@@ -363,7 +363,7 @@ table.feat td { vertical-align: middle; }
       <tr><td>v1</td><td><code>BCE</code></td><td class="w">Pixelvergleich, eine weitere Formel namens Binary Cross-Entropy</td></tr>
       <tr><td>v2</td><td><code>BCE + KL</code></td><td class="w">Pixelvergleich, dazu eine Strafe, die den Merkzettel-Raum glatt hält</td></tr>
       <tr><td>v3</td><td><code>MSE</code></td><td class="w">Pixelvergleich, quadriert</td></tr>
-      <tr><td>v4</td><td><code>MSE + 0,000001 × VGG</code></td><td class="w">Pixelvergleich und Vergleich im Blick des Bilderkennungsnetzes</td></tr>
+      <tr><td>v4</td><td><code>MSE + 0,00001 × VGG</code></td><td class="w">Pixelvergleich und Vergleich im Blick des Bilderkennungsnetzes</td></tr>
       <tr class="hl"><td>v5</td><td><code>L1 + 0,2 × (1 − SSIM)</code></td><td class="w">Pixelvergleich und Struktur in kleinen Ausschnitten</td></tr>
     </tbody>
   </table></div>
@@ -401,7 +401,7 @@ table.feat td { vertical-align: middle; }
       <li>Original und Nachbild laufen getrennt durch VGG.</li>
       <li>An drei Stellen im Netz lesen wir die Zwischenergebnisse aus. Das sind Stapel von Merkmalskarten: insgesamt 448 Karten, 32×32, 16×16 und 8×8 Felder groß.</li>
       <li>Für jede Stelle: Durchschnitt der quadrierten Unterschiede. Davon wieder der Durchschnitt.</li>
-      <li>Weil diese Werte riesig sind, werden sie mit 0,000001 multipliziert und zur MSE addiert.</li>
+      <li>Weil diese Werte riesig sind, werden sie mit 0,00001 multipliziert und zur MSE addiert.</li>
     </ol>
     <p>VGG selbst lernt nichts dazu. Die Rückmeldung läuft aber durch VGG hindurch zu unseren Reglern.</p>
     <p><b>So sehen echte Merkmalskarten aus,</b> hier vom Frosch. Hell heißt: Diese Karte reagiert dort stark.</p>
@@ -410,7 +410,7 @@ table.feat td { vertical-align: middle; }
       <tbody id="featBody"></tbody>
     </table></div>
     <p class="note">Von 448 Karten sind hier 3 zu sehen, jeweils die mit der größten Schwankung im Original. Die Karten sind stark vergrößert. Die untere Reihe zeigt vor allem den Bildrand, weil das kleine 32×32-Bild VGG am Ende kaum noch Fläche lässt.</p>
-    <p><b>Was daran auffällt:</b> In diesen drei Karten ist das feine Raster von v4 kaum zu erkennen. Das passt zu der Erklärung, dass VGG sehr feine Muster schlecht sieht und dieses Raster deshalb kaum bestraft. Bewiesen ist es damit nicht, denn es sind nur 3 von 448 Karten bei einem Bild.</p>
+    <p><b>Was daran auffällt:</b> Im Bild selbst ist das Raster von v4 deutlich zu sehen, in diesen drei Karten nur schwach, am ehesten in der oberen Reihe. Das passt zu der Erklärung, dass VGG sehr feine Muster schlecht sieht und dieses Raster deshalb wenig bestraft. Bewiesen ist es damit nicht, denn es sind nur 3 von 448 Karten bei einem Bild.</p>
   </div>
 
   <div class="demo">
@@ -437,7 +437,7 @@ const CLASSES = ["Flugzeug","Auto","Vogel","Katze","Hirsch","Hund","Frosch","Pfe
 // Echte CIFAR-10-Labels der zehn Beispielbilder (x_test[:10]).
 const SAMPLE_LABELS = [3,8,8,0,6,6,1,6,3,1];
 const NAMES = {v1:"v1", v2:"v2 VAE", v3:"v3", v4:"v4", v5:"v5"};
-const CAP = {v1:"2 Zahlen", v2:"2 Zahlen", v3:"32 Zahlen", v4:"256 Zahlen", v5:"512 Zahlen"};
+const CAP = {v1:"2 Zahlen", v2:"2 Zahlen", v3:"32 Zahlen", v4:"32 Zahlen", v5:"512 Zahlen"};
 const de = (x, d) => x.toLocaleString("de-DE", {minimumFractionDigits:d, maximumFractionDigits:d}).replace(/[’']/g, ".");
 const pct = x => de(x*100, 1) + " %";
 const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
@@ -450,7 +450,7 @@ document.querySelectorAll(".tile[data-strip]").forEach(t => setTile(t, t.dataset
 document.querySelectorAll("img[data-src]").forEach(i => { i.src = IMG[i.dataset.src]; });
 
 const hero = document.getElementById("hero");
-[["original","Original","3.072 Zahlen"],["v1","v1","2 Zahlen"],["v2","v2","2 Zahlen, VAE"],["v3","v3","32 Zahlen"],["v4","v4","256 Zahlen"],["v5","v5","512 Zahlen"]].forEach(([k,n,c]) => {
+[["original","Original","3.072 Zahlen"],["v1","v1","2 Zahlen"],["v2","v2","2 Zahlen, VAE"],["v3","v3","32 Zahlen"],["v4","v4","32 Zahlen"],["v5","v5","512 Zahlen"]].forEach(([k,n,c]) => {
   const f = el("figure"); const t = el("div","tile"); setTile(t,k,7);
   f.append(t, el("figcaption","",`<b>${n}</b><br>${c}`)); hero.append(f);
 });
@@ -466,7 +466,7 @@ function bars(id, rows, max, fmt) {
     host.append(row);
   });
 }
-bars("squeeze", [{name:"Original",v:3072,cls:"ref"},{name:"v5",v:512,cls:"best"},{name:"v4",v:256},{name:"v3",v:32},{name:"v1 und v2",v:2}], 3072, x => x.toLocaleString("de-DE").replace(/[’']/g,"."));
+bars("squeeze", [{name:"Original",v:3072,cls:"ref"},{name:"v5",v:512,cls:"best"},{name:"v3 und v4",v:32},{name:"v1 und v2",v:2}], 3072, x => x.toLocaleString("de-DE").replace(/[’']/g,"."));
 
 const V = DATA.versions;
 bars("ssim", [
@@ -476,7 +476,7 @@ bars("ras", [
   {name:"Original",v:EXTRA.original.nyquist_power,cls:"ref"},{name:"v1",v:V.v1.nyquist_power},{name:"v2 VAE",v:V.v2.nyquist_power},{name:"v3",v:V.v3.nyquist_power},
   {name:"v4",v:V.v4.nyquist_power,cls:"warn"},{name:"v5",v:V.v5.nyquist_power,cls:"best"}], V.v4.nyquist_power, x => de(x,3));
 bars("knn", [
-  {name:"Raten",v:.1,cls:"ref"},{name:"v1",v:V.v1.knn},{name:"v2 VAE",v:V.v2.knn},{name:"v3",v:V.v3.knn,cls:"best"},{name:"v4",v:V.v4.knn},{name:"v5",v:V.v5.knn},{name:"Rohe Pixel",v:.269,cls:"ref"}], .5, pct);
+  {name:"Raten",v:.1,cls:"ref"},{name:"v1",v:V.v1.knn},{name:"v2 VAE",v:V.v2.knn},{name:"v3",v:V.v3.knn},{name:"v4",v:V.v4.knn,cls:"best"},{name:"v5",v:V.v5.knn},{name:"Rohe Pixel",v:.269,cls:"ref"}], .5, pct);
 
 // Cluster
 let currentImage = 7;
@@ -548,7 +548,7 @@ const multi = document.getElementById("multi");
 
 // Bildvergleich
 const pick = document.getElementById("pick"), big = document.getElementById("big");
-const CMP = [["original","Original","3.072 Zahlen"],["v1","v1","2 Zahlen"],["v2","v2","2 Zahlen, VAE"],["v3","v3","32 Zahlen"],["v4","v4","256 Zahlen, Raster"],["v5_256","v5 klein","256 Zahlen"],["v5","v5","512 Zahlen"]];
+const CMP = [["original","Original","3.072 Zahlen"],["v1","v1","2 Zahlen"],["v2","v2","2 Zahlen, VAE"],["v3","v3","32 Zahlen"],["v4","v4","32 Zahlen, Raster"],["v5_256","v5 klein","256 Zahlen"],["v5","v5","512 Zahlen"]];
 const bigT = CMP.map(([k,n,c]) => { const f = el("figure"); const t = el("div","tile"); f.append(t, el("figcaption","",`<b>${n}</b><br>${c}`)); big.append(f); return [t,k]; });
 function show(i) {
   bigT.forEach(([t,k]) => setTile(t,k,i));
@@ -560,7 +560,8 @@ show(7);
 // Tabelle
 const rows = [
   ["v1","Übung repariert","2",V.v1],["v2","VAE","2",V.v2],["v3","tiefer, MSE","32",V.v3],
-  ["R0 (v4)","alter Decoder, MSE + VGG, 10.000 Bilder","256",EXTRA.R0],
+  ["v4","alter Decoder, MSE + VGG, 50.000 Bilder","32",V.v4],
+  ["R0","Nachlauf: alter Decoder, MSE + VGG, 10.000 Bilder","256",EXTRA.R0],
   ["A2","alter Decoder, MSE","256",EXTRA.A2],["A1","alter Decoder, L1 + SSIM","256",EXTRA.A1],
   ["R1","neue Architektur, L1 + SSIM","256",EXTRA.R1],["R2","R1 + 300 Schritte VGG","256",EXTRA.R2],
   ["v5","neue Architektur, L1 + SSIM","512",V.v5,"hl"],["PCA 512","klassisches Vergleichsverfahren","512",EXTRA.pca512]];
@@ -646,7 +647,7 @@ document.getElementById("frogTable").innerHTML = `<thead><tr><th>Baustein</th><t
   <tr class="hl"><td>Note nach v5-Formel: L1 + 0,2 × (1 − SSIM)</td><td>${de(noteNew(f4),4)}</td><td>${de(noteNew(f5),4)}</td></tr>
   <tr><td>MSE</td><td>${de(f4.mse,4)}</td><td>${de(f5.mse,4)}</td></tr>
   <tr><td>VGG-Wert, roh</td><td>${Math.round(f4.vgg_raw).toLocaleString("de-DE").replace(/[’']/g,".")}</td><td>${Math.round(f5.vgg_raw).toLocaleString("de-DE").replace(/[’']/g,".")}</td></tr>
-  <tr class="hl"><td>Note nach v4-Formel: MSE + 0,000001 × VGG</td><td>${de(noteOld(f4),4)}</td><td>${de(noteOld(f5),4)}</td></tr></tbody>`;
+  <tr class="hl"><td>Note nach v4-Formel: MSE + 0,00001 × VGG</td><td>${de(noteOld(f4),4)}</td><td>${de(noteOld(f5),4)}</td></tr></tbody>`;
 
 draw();
 window.addEventListener("resize", draw);

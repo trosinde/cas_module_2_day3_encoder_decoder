@@ -16,6 +16,13 @@ from keras import layers, models, callbacks
 from keras.applications import vgg16
 from scipy.ndimage import convolve
 
+if os.environ.get("AE_GPU_MEM_MB"):
+    # TensorFlow reserviert auf der RTX 3050 Ti sonst nur rund 2,1 GB von knapp 4 GB.
+    tf.config.set_logical_device_configuration(
+        tf.config.list_physical_devices("GPU")[0],
+        [tf.config.LogicalDeviceConfiguration(memory_limit=int(os.environ["AE_GPU_MEM_MB"]))],
+    )
+
 OUT = Path(__file__).resolve().parent / "runs"
 NOTEBOOKS = Path(__file__).resolve().parent.parent
 BATCH_SIZE = 100

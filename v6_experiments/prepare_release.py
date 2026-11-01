@@ -34,8 +34,17 @@ NOTEBOOKS = {
     "autoencoder_on_CIFAR-10_v2_vae.ipynb": dict(fit=UUID_FIT, save=UUID_SAVE, load=enc_dec("encoder_v2.keras", "decoder_v2.keras"),
         names={"vae.keras": "vae_v2.keras", "encoder.keras": "encoder_v2.keras", "decoder.keras": "decoder_v2.keras"}),
     "autoencoder_on_CIFAR-10_v3_latent_quality.ipynb": dict(fit="fit", save="save-models", load=ae("autoencoder_v3.keras")),
-    "autoencoder_on_CIFAR-10_v4_perceptual_loss.ipynb": dict(fit="fit", save="save-models", load=ae("autoencoder_v4.keras")),
-    "autoencoder_on_CIFAR-10_v5_sharp_decoder.ipynb": dict(fit="fit", save="save-models", load=ae("autoencoder_v5.keras")),
+    "autoencoder_on_CIFAR-10_v4_perceptual_loss.ipynb": dict(fit="fit", save="save-models", load=ae("autoencoder_v4.keras"),
+        source=Path.home() / "dev/.nb_run_tmp/autoencoder_on_CIFAR-10_v4_perceptual_loss_executed.ipynb",
+        note="Der ursprüngliche v4-Lauf: 32 Zahlen wie v3, VGG-Gewicht 1e-5, 25 Epochen. Ergebnis: starkes Raster (5,95 statt 0,056 im Original), aber der beste Klassen-Treffer aller Versionen (41,9 %)."),
+    "autoencoder_on_CIFAR-10_v4b_nachlauf_256.ipynb": dict(fit="fit", save="save-models", load=ae("autoencoder_r0.keras"),
+        source=SRC / "autoencoder_on_CIFAR-10_v4_perceptual_loss.ipynb",
+        names={"autoencoder_v4.keras": "autoencoder_r0.keras", "encoder_v4.keras": "encoder_r0.keras", "decoder_v4.keras": "decoder_r0.keras"},
+        note="Nachlauf R0 für den Vergleich mit dem neuen Decoder in v5: 256 Zahlen, VGG-Gewicht 1e-6, 10.000 Bilder, 15 Epochen. Nicht der ursprüngliche v4-Lauf, der steht im v4-Notebook."),
+    "autoencoder_on_CIFAR-10_v5_sharp_decoder.ipynb": dict(fit="fit", save="save-models", load=ae("autoencoder_v5.keras"),
+        replace={"Die v4-Referenz R0 wurde mit dem v4-Code nachgestellt, weil vom ursprünglichen v4-Lauf weder Ausgaben noch Modelle gespeichert sind.": "R0 ist ein Nachlauf mit 256 Zahlen und 10.000 Bildern, siehe `v4b_nachlauf_256`. Der ursprüngliche v4-Lauf mit 32 Zahlen steht im v4-Notebook.",
+                 "| R0: v4 nachgestellt |": "| R0: Nachlauf 256 Zahlen |",
+                 "R0: v4-Referenz": "R0: Nachlauf"}),
 }
 NOTE = """> **Trainierte Modelle:** Dieses Notebook lädt das fertige Modell aus `models/` und trainiert nicht neu. Zum Neutrainieren in den Parametern `TRAIN_MODEL = True` setzen."""
 
@@ -50,11 +59,11 @@ def indent(text):
 
 
 def patch(name, cfg):
-    nb = json.load(open(SRC / name))
+    nb = json.load(open(cfg.get("source", SRC / name)))
     for old, new in cfg.get("replace", {}).items():
         hits = 0
         for c in nb["cells"]:
-            if c["cell_type"] == "code" and old in "".join(c["source"]):
+            if old in "".join(c["source"]):
                 c["source"] = src("".join(c["source"]).replace(old, new))
                 hits += 1
         assert hits, (name, old)
@@ -69,7 +78,7 @@ def patch(name, cfg):
     for old, new in cfg.get("names", {}).items():
         text = text.replace(f'"./models/{old}"', f'"./models/{new}"')
     save["source"] = src(f"if TRAIN_MODEL:\n{indent(text)}")
-    nb["cells"].insert(0, {"cell_type": "markdown", "id": "trained-model-note", "metadata": {}, "source": src(NOTE)})
+    nb["cells"].insert(0, {"cell_type": "markdown", "id": "trained-model-note", "metadata": {}, "source": src(NOTE + ("\n\n" + cfg["note"] if "note" in cfg else ""))})
     nb["metadata"]["kernelspec"] = {"display_name": "Python 3", "language": "python", "name": "python3"}
     (DEST / name).write_text(json.dumps(nb, indent=1, ensure_ascii=False))
     print("gepatcht", name)
