@@ -10,6 +10,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SRC = HERE.parent
+# Die lokalen Notebooks laden inzwischen selbst, Ausgangspunkt bleibt deshalb die Sicherung davor.
+ORIG = SRC / "notebooks_original_vor_github"
 DEST = Path(sys.argv[1])
 TRAIN_COURSE = "--train-course" in sys.argv
 
@@ -38,7 +40,7 @@ NOTEBOOKS = {
         source=Path.home() / "dev/.nb_run_tmp/autoencoder_on_CIFAR-10_v4_perceptual_loss_executed.ipynb",
         note="Der ursprüngliche v4-Lauf: 32 Zahlen wie v3, VGG-Gewicht 1e-5, 25 Epochen. Ergebnis: starkes Raster (5,95 statt 0,056 im Original), aber der beste Klassen-Treffer aller Versionen (41,9 %)."),
     "autoencoder_on_CIFAR-10_v4b_nachlauf_256.ipynb": dict(fit="fit", save="save-models", load=ae("autoencoder_r0.keras"),
-        source=SRC / "autoencoder_on_CIFAR-10_v4_perceptual_loss.ipynb",
+        source=ORIG / "autoencoder_on_CIFAR-10_v4_perceptual_loss.ipynb",
         names={"autoencoder_v4.keras": "autoencoder_r0.keras", "encoder_v4.keras": "encoder_r0.keras", "decoder_v4.keras": "decoder_r0.keras"},
         note="Nachlauf R0 für den Vergleich mit dem neuen Decoder in v5: 256 Zahlen, VGG-Gewicht 1e-6, 10.000 Bilder, 15 Epochen. Nicht der ursprüngliche v4-Lauf, der steht im v4-Notebook."),
     "autoencoder_on_CIFAR-10_v5_sharp_decoder.ipynb": dict(fit="fit", save="save-models", load=ae("autoencoder_v5.keras"),
@@ -59,7 +61,7 @@ def indent(text):
 
 
 def patch(name, cfg):
-    nb = json.load(open(cfg.get("source", SRC / name)))
+    nb = json.load(open(cfg.get("source", ORIG / name)))
     for old, new in cfg.get("replace", {}).items():
         hits = 0
         for c in nb["cells"]:

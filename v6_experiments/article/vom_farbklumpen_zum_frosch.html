@@ -297,6 +297,20 @@ table.feat td { vertical-align: middle; }
 <section>
   <div class="eyebrow">Zusammenfassung</div>
   <h2>Was am meisten gebracht hat</h2>
+  <div class="answer">
+    <h3>Warum hat v4 die höhere Prozentzahl, obwohl v5 besser ist?</h3>
+    <p>Die beiden messen Verschiedenes. <b>Besser</b> heißt auf dieser Seite: Das Bild wird genauer nachgemalt. Die Prozentzahl ist der Klassen-Treffer und sagt nur, wie gut ähnliche Merkzettel zur selben Klasse gehören. Das Bild selbst geht darin nicht ein. v5 malt also deutlich besser, v4 sortiert besser.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Messung</th><th>v4</th><th>v5</th><th>Besser</th></tr></thead>
+      <tbody>
+        <tr><td>Ähnlichkeit (SSIM, höher ist besser)</td><td>0,423</td><td>0,903</td><td>v5</td></tr>
+        <tr><td>Abweichung (MSE, niedriger ist besser)</td><td>0,0182</td><td>0,0022</td><td>v5</td></tr>
+        <tr><td>Raster (Original 0,056, darüber ist Muster)</td><td>5,949</td><td>0,007</td><td>v5</td></tr>
+        <tr><td>Klassen-Treffer (k-NN, höher ist besser)</td><td>41,9 %</td><td>23,7 %</td><td>v4</td></tr>
+      </tbody>
+    </table></div>
+    <p>Das Ziel dieser Versionen war das Nachmalen, deshalb gilt v5 als besser. Warum v4 besser sortiert, ist nicht gemessen. Vermutlich hilft, dass sein Prüfer mit den Merkmalen eines Bilderkennungsnetzes rechnet.</p>
+  </div>
   <div class="chart">
     <h3>Ähnlichkeit zum Original nach Version (SSIM, 1,0 = identisch)</h3>
     <div class="squeeze" id="ssim"></div>
